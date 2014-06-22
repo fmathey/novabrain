@@ -1,8 +1,8 @@
 {
     "name": "novabrain",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "id": "novabrain",
-    "_id": "novabrain@0.0.7",
+    "_id": "novabrain@0.0.8",
     "_from": "novabrain@*",
     "description": "Neural network module",
     "keywords": [
@@ -39,6 +39,6 @@
     "engines": {
         "node": ">=0.10.28"
     },
-    "readme": "# Novabrain #\n\nNeural network module for Node.js.\n\n## Install ##\n\nnpm install novabrain\n\n",
+    "readme": "# Novabrain\n\nNovabrain is a Node.js [neural network](http://en.wikipedia.org/wiki/Artificial_neural_network) module.\nAt this moment training is made with a genetic algorithm.\n```\n$ npm install novabrain\n```\n\nThis example shows how the neural network is trained to learn XOR with Genetic Algorithm\n\n```javascript\nvar assert = require('assert');\nvar novabrain = require('novabrain');\n\nvar network = new novabrain.Network({\n    numberOfInputs: 2,\n    numberOfOutputs: 1,\n    numberOfHiddenLayers: 2,\n    numberOfNeuronsPerHiddenLayer : 5,\n});\n\nvar trainer = new novabrain.GeneticTrainer({\n    populationSize : 400,\n    maxIterations  : 2000,\n   mutationRate   : 0.8,\n    survivalRate   : 0.3,\n    maxPerbutation : 0.9,\n});\n\ntrainer.train(network, [\n    { input: [0,0], output: [0] },\n    { input: [0,1], output: [1] },\n    { input: [1,0], output: [1] },\n    { input: [1,1], output: [0] },\n]);\n\nassert.strictEqual(Math.round(network.run([0,0]) * 1) / 1, 0);\nassert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 1);\nassert.strictEqual(Math.round(network.run([1,0]) * 1) / 1, 1);\nassert.strictEqual(Math.round(network.run([1,1]) * 1) / 1, 0);\n```\nMocha is used for unit testing\n```\n$ npm install mocha -g\n$ mocha\n$ mocha test\n$ mocha test/neuron\n$ ...\n```",
     "readmeFilename": "README.md"
 }
