@@ -22,7 +22,7 @@
         "url": "https://github.com/fmathey/novabrain/issues"
     },
     "devDependencies": {
-        "mocha": ">=1.20.1",
+        "mocha": ">=1.20.1"
     },
     "dependencies": {
         
