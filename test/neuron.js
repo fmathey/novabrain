@@ -1,6 +1,6 @@
 
 var assert = require('assert');
-var Neuron = require('./../lib/neuron');
+var Neuron = require('./../src/neuron');
 
 describe('Neuron', function(){
 

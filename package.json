@@ -1,8 +1,8 @@
 {
     "name": "novabrain",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "id": "novabrain",
-    "_id": "novabrain@0.0.2",
+    "_id": "novabrain@0.0.3",
     "_from": "novabrain@*",
     "description": "Neural network module",
     "keywords": [
@@ -28,7 +28,7 @@
         
     },
     "directories": {
-        "lib": "./sources"
+        "lib": "./src"
     },
     "scripts": {
         "test": "mocha tests"

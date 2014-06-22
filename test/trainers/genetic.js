@@ -1,7 +1,7 @@
 
 var assert  = require('assert');
-var Network = require('./../../lib/network');
-var Trainer = require('./../../lib/trainers/genetic');
+var Network = require('./../../src/network');
+var Trainer = require('./../../src/trainers/genetic');
 
 describe('Genetic Trainer', function(){
 
