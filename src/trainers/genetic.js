@@ -16,6 +16,7 @@ var GeneticTrainer = module.exports = function(options) {
     this.options.maxPerbutation = options.maxPerbutation || 0.3;
     this.options.survivalRate   = options.survivalRate || 0.3;
     this.options.thresholdError = options.thresholdError || 0.015;
+    this.options.floodCallback  = options.floodCallback || null;
 };
 
 //
@@ -51,6 +52,11 @@ GeneticTrainer.prototype.train = function(network, training) {
             });
 
             networks[j].__fitness = error;
+
+            if (this.options.floodCallback && typeof this.options.floodCallback === 'function') {
+                this.options.floodCallback(iteration, error);
+            }
+
             if (error <= this.options.thresholdError) {
                 network.update(networks[0].export().weights);
                 return {
