@@ -1,15 +1,19 @@
 {
     "name": "novabrain",
-    "version": "0.0.1",
+    "version": "0.5.3",
     "id": "novabrain",
-    "_id": "novabrain@0.0.1",
+    "_id": "novabrain@0.5.3",
     "_from": "novabrain@*",
-    "description": "Neural network module",
+    "description": "Neural network library for NodeJS",
     "keywords": [
         "perceptron",
-        "nerual network",
+        "neural network",
         "brain",
-        "genetic algorithm"
+        "backprop",
+        "back propagation",
+        "classifier",
+        "machine learning",
+        "artificial intelligence"
     ],
     "license": "MIT",
     "author": "François Mathey <fmathey81@gmail.com>",
@@ -22,20 +26,20 @@
         "url": "https://github.com/fmathey/novabrain/issues"
     },
     "devDependencies": {
-        "mocha": ">=1.20.1",
+        "mocha": ">=1.20.1"
     },
     "dependencies": {
         
     },
     "directories": {
-        "lib": "./sources"
+        "lib": "./src"
     },
     "scripts": {
-        "test": "mocha tests"
+        "test": "mocha"
     },
     "engines": {
         "node": ">=0.10.28"
     },
-    "readme": "# Novabrain #\n\nNeural network module for Node.js.\n\n## Install ##\n\nnpm install novabrain\n\n",
+    "readme": "# Novabrain\n\nNovabrain is a Node.js [neural network](http://en.wikipedia.org/wiki/Artificial_neural_network) module.\n\n```\n$ npm install novabrain\n```\n### Back Propagation Training\n\nThis example shows how the neural network is trained to learn XOR\n\n```javascript\nvar novabrain = require('novabrain');\nvar network   = new novabrain.Network();\n\nnetwork.train([\n    { input: [0,0], output: [0] },\n    { input: [0,1], output: [1] },\n    { input: [1,0], output: [1] },\n    { input: [1,1], output: [0] },\n], {\n    callback: function(data) {\n        console.log(data);\n    }\n});\n\nconsole.log('');\nconsole.log('----------------------------------------------');\nconsole.log('NETWORK RUN XOR');\nconsole.log('----------------------------------------------');\nconsole.log('');\nconsole.log('  - [ 0 , 0 ] = ', Math.round(network.run([0,0]) * 1) / 1);\nconsole.log('  - [ 0 , 1 ] = ', Math.round(network.run([0,1]) * 1) / 1);\nconsole.log('  - [ 1 , 0 ] = ', Math.round(network.run([1,0]) * 1) / 1);\nconsole.log('  - [ 1 , 1 ] = ', Math.round(network.run([1,1]) * 1) / 1);\nconsole.log('');\nconsole.log('----------------------------------------------');\nconsole.log('');\n\nvar run = network.toFunction();\n\nconsole.log('');\nconsole.log('----------------------------------------------');\nconsole.log('STANDALONE FUNCTION RUN XOR');\nconsole.log('----------------------------------------------');\nconsole.log('');\nconsole.log('  - [ 0 , 0 ] = ', Math.round(run([0,0]) * 1) / 1);\nconsole.log('  - [ 0 , 1 ] = ', Math.round(run([0,1]) * 1) / 1);\nconsole.log('  - [ 1 , 0 ] = ', Math.round(run([1,0]) * 1) / 1);\nconsole.log('  - [ 1 , 1 ] = ', Math.round(run([1,1]) * 1) / 1);\nconsole.log('');\nconsole.log('----------------------------------------------');\nconsole.log('');\n```\n\n### Mocha is used for unit testing\n```\n$ npm install mocha -g\n$ mocha\n$ mocha test\n$ ...\n```\n",
     "readmeFilename": "README.md"
 }

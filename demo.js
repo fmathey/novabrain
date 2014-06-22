@@ -1,17 +1,7 @@
-# Novabrain
 
-Novabrain is a Node.js [neural network](http://en.wikipedia.org/wiki/Artificial_neural_network) module.
+var novabrain = require('./index');
 
-```
-$ npm install novabrain
-```
-### Back Propagation Training
-
-This example shows how the neural network is trained to learn XOR
-
-```javascript
-var novabrain = require('novabrain');
-var network   = new novabrain.Network();
+var network = new novabrain.Network();
 
 network.train([
     { input: [0,0], output: [0] },
@@ -51,12 +41,3 @@ console.log('  - [ 1 , 1 ] = ', Math.round(run([1,1]) * 1) / 1);
 console.log('');
 console.log('----------------------------------------------');
 console.log('');
-```
-
-### Mocha is used for unit testing
-```
-$ npm install mocha -g
-$ mocha
-$ mocha test
-$ ...
-```
