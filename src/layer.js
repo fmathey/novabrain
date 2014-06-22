@@ -8,7 +8,7 @@ var Neuron = require('./neuron');
 // Set of neurons
 //
 // @param Integer : Number of neurons
-// @param Integer : NumberOfInputsPerNeuron
+// @param Integer : Number of inputs per neuron
 //
 var Layer = module.exports = function(numberOfNeurons, numberOfInputsPerNeuron) {
     if (!numberOfNeurons || numberOfNeurons < 1) {
