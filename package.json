@@ -1,15 +1,18 @@
 {
     "name": "novabrain",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "id": "novabrain",
-    "_id": "novabrain@0.0.3",
+    "_id": "novabrain@0.0.4",
     "_from": "novabrain@*",
     "description": "Neural network module",
     "keywords": [
         "perceptron",
         "neural network",
         "brain",
-        "genetic algorithm"
+        "genetic algorithm",
+        "classifier",
+        "machine learning",
+        "artificial intelligence"
     ],
     "license": "MIT",
     "author": "François Mathey <fmathey81@gmail.com>",
