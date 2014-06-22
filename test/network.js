@@ -1,6 +1,6 @@
 
 var assert = require('assert');
-var Network = require('./../lib/network');
+var Network = require('./../src/network');
 
 describe('Network', function(){
 

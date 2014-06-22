@@ -1,7 +1,7 @@
 
 var assert = require('assert');
-var Neuron = require('./../lib/neuron');
-var Layer  = require('./../lib/layer');
+var Neuron = require('./../src/neuron');
+var Layer  = require('./../src/layer');
 
 
 describe('Layer', function(){
