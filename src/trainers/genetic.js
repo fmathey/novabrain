@@ -47,7 +47,7 @@ GeneticTrainer.prototype.train = function(network, training) {
             var error = 0;
             training.forEach(function(data) {
                 var results = networks[j].run(data.input);
-                error += __getErrorRate(results, data.output);
+                error += GeneticTrainerHelper.getErrorRate(results, data.output);
             });
 
             networks[j].__fitness = error;
@@ -59,7 +59,7 @@ GeneticTrainer.prototype.train = function(network, training) {
                 }
             }
         };
-        networks = __makeNewGeneration(networks, this.options);
+        networks = GeneticTrainerHelper.makeNewGeneration(networks, this.options);
         iteration++;
     }
 
@@ -72,7 +72,14 @@ GeneticTrainer.prototype.train = function(network, training) {
 };
 
 //
-// __getErrorRate
+// GeneticTrainerHelper
+//
+// Not exported.
+//
+var GeneticTrainerHelper = {};
+
+//
+// GeneticTrainerHelper > getErrorRate
 //
 // Returns errors sum
 // 
@@ -80,7 +87,7 @@ GeneticTrainer.prototype.train = function(network, training) {
 // @param  Array
 // @return Float
 //
-var __getErrorRate = function (a, b) {
+GeneticTrainerHelper.getErrorRate = function (a, b) {
     var sumError = 0;
     for (var i = a.length - 1; i >= 0; i--) {
         sumError += Math.abs(a[i] - b[i]);
@@ -89,7 +96,7 @@ var __getErrorRate = function (a, b) {
 };
 
 //
-// __mergeWeights
+// GeneticTrainerHelper > mergeWeights
 //
 // Returns merged weights
 // 
@@ -97,7 +104,7 @@ var __getErrorRate = function (a, b) {
 // @param  Array : Weights list
 // @return Array : All weights
 //
-var __mergeWeights = function(a, b) {
+GeneticTrainerHelper.mergeWeights = function(a, b) {
     var result = [];
     var aLength = Math.ceil(a.length / 2);
     var bLength = Math.floor(b.length / 2);
@@ -111,7 +118,7 @@ var __mergeWeights = function(a, b) {
 };
 
 //
-// __mutateWeights
+// GeneticTrainerHelper > mutateWeights
 //
 // Returns mutated weights
 // 
@@ -119,7 +126,7 @@ var __mergeWeights = function(a, b) {
 // @param  Object : Trainer options
 // @return Array  : Mutated weights
 //
-var __mutateWeights = function(weights, options) {
+GeneticTrainerHelper.mutateWeights = function(weights, options) {
     var mutated = [];
     weights.forEach(function(weight) {
         if(Math.random() < options.mutationRate) {
@@ -132,7 +139,7 @@ var __mutateWeights = function(weights, options) {
 };
 
 //
-// __mutateWeights
+// GeneticTrainerHelper > mutateWeights
 //
 // Returns mutated weights
 // 
@@ -140,7 +147,7 @@ var __mutateWeights = function(weights, options) {
 // @param  Object : Trainer options
 // @return Array  : List of new generation Networks
 //
-var __makeNewGeneration = function (networks, options) {
+GeneticTrainerHelper.makeNewGeneration = function (networks, options) {
 
     networks.sort(function(a, b) { return a.__fitness - b.__fitness; });
 
@@ -153,8 +160,8 @@ var __makeNewGeneration = function (networks, options) {
         var optionsA = networks[Math.floor(Math.random() * kills)].export();
         var optionsB = networks[Math.floor(Math.random() * kills)].export();
         var optionsC = optionsA;
-        var combined = __mergeWeights(optionsA.weights, optionsB.weights);
-        optionsC.weights = __mutateWeights(combined, options);
+        var combined = GeneticTrainerHelper.mergeWeights(optionsA.weights, optionsB.weights);
+        optionsC.weights = GeneticTrainerHelper.mutateWeights(combined, options);
         networks.push(new Network(optionsC));
     }
 
