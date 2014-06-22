@@ -1,0 +1,41 @@
+{
+    "name": "novabrain",
+    "version": "0.0.1",
+    "id": "novabrain",
+    "_id": "novabrain@0.0.1",
+    "_from": "novabrain@*",
+    "description": "Neural network module",
+    "keywords": [
+        "perceptron",
+        "nerual network",
+        "brain",
+        "genetic algorithm"
+    ],
+    "license": "MIT",
+    "author": "François Mathey <fmathey81@gmail.com>",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:fmathey/novabrain.git",
+        "web": "https://github.com/fmathey/novabrain"
+    },
+    "bugs": {
+        "url": "https://github.com/fmathey/novabrain/issues"
+    },
+    "devDependencies": {
+        "mocha": ">=1.20.1",
+    },
+    "dependencies": {
+        
+    },
+    "directories": {
+        "lib": "./sources"
+    },
+    "scripts": {
+        "test": "mocha tests"
+    },
+    "engines": {
+        "node": ">=0.10.28"
+    },
+    "readme": "# Novabrain #\n\nNeural network module for Node.js.\n\n## Install ##\n\nnpm install novabrain\n\n",
+    "readmeFilename": "README.md"
+}
