@@ -27,7 +27,7 @@ var trainer = new novabrain.GeneticTrainer({
     survivalRate   : 0.3,
     maxPerbutation : 0.9,
     errorThreshold : 0.005,
-    floodCallback: function(data) {
+    floodCallback  : function(data) {
         console.log(data);
     }
 });
@@ -44,6 +44,7 @@ assert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 1);
 assert.strictEqual(Math.round(network.run([1,0]) * 1) / 1, 1);
 assert.strictEqual(Math.round(network.run([1,1]) * 1) / 1, 0);
 ```
+
 Mocha is used for unit testing
 ```
 $ npm install mocha -g
