@@ -56,7 +56,7 @@ GeneticTrainer.prototype.train = function(network, training) {
             if (this.options.floodCallback && typeof this.options.floodCallback === 'function') {
                 this.options.floodCallback({
                     iteration: iteration,
-                    fistness: error,
+                    fitness: networks[j].__fitness,
                 });
             }
 
