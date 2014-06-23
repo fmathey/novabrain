@@ -26,6 +26,10 @@ var trainer = new novabrain.GeneticTrainer({
     mutationRate   : 0.8,
     survivalRate   : 0.3,
     maxPerbutation : 0.9,
+    errorThreshold : 0.005,
+    floodCallback: function(data) {
+        console.log(data);
+    }
 });
 
 trainer.train(network, [ 
