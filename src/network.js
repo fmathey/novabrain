@@ -53,6 +53,26 @@ var Network = module.exports = function(options) {
 Network.prototype = Object.create(Array.prototype);
 
 //
+// Network > size
+//
+// Returns the network size
+// 
+// @return Integer
+//
+Network.prototype.size = function() {
+    var size = 0;
+    size += this.options.numberOfInputs + this.options.numberOfInputs;
+    size += this.options.numberOfNeuronsPerHiddenLayer * (this.options.numberOfInputs + 1);
+    size += this.options.numberOfOutputs * (this.options.numberOfNeuronsPerHiddenLayer + 1);
+    if (this.options.numberOfHiddenLayers > 1) {
+        size += this.options.numberOfNeuronsPerHiddenLayer *
+            (this.options.numberOfNeuronsPerHiddenLayer + 1) *
+            (this.options.numberOfHiddenLayers - 1);
+    }
+    return size;
+};
+
+//
 // Network > run
 //
 // Returns an array of sigmoid values
@@ -112,8 +132,8 @@ Network.prototype.export = function() {
 // @return Network 
 //
 Network.prototype.update = function(weights) {
-    if(!(weights && Array.isArray(weights) && weights.length)) {
-        throw new Error('Network::import expected an array');
+    if(!(Array.isArray(weights) && weights.length === this.size())) {
+        throw new Error('Network::import expected an array of ' + this.size() + ' values');
     }
     var counter = 0;
     this.forEach(function(layer) {

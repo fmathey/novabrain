@@ -6,12 +6,12 @@ describe('Network', function(){
 
     describe('#constructor', function(){
 
-        it('should be an Array instance', function(){
+        it('should be an Array instance', function() {
             var network = new Network();
             assert.ok(network instanceof Array);
         });
 
-        it('should have 3 default layers', function(){
+        it('should have 3 default layers', function() {
             var network = new Network();
             assert.strictEqual(network.length, 3);
         });
@@ -23,11 +23,20 @@ describe('Network', function(){
             assert.strictEqual(network.length, 5);
         });
 
+        it('should throw an exception for invalid weights', function() {
+            assert.throws(function() {
+                var network = new Network({
+                    numberOfHiddenLayers: 3,
+                    weights: [1,2]
+                });
+            });
+        });
+
     });
 
     describe('#run', function(){
 
-        it('should throw an exception if the input param is not an array', function(){
+        it('should throw an exception if the input param is not an array', function() {
             var network = new Network();
             assert.throws(function() { network.run(); }, Error);
             assert.throws(function() { network.run({}); }, Error);
@@ -37,7 +46,7 @@ describe('Network', function(){
             assert.throws(function() { network.run('foo'); }, Error);
         });
 
-        it('should throw an exception if the input array length is different of the neuron inputs number', function(){
+        it('should throw an exception if the input array length is different of the neuron inputs number', function() {
             var network = new Network({ numberOfInputs: 1 });
             assert.throws(function() { network.run([]); }, Error);
             assert.throws(function() { network.run([1,2]); }, Error);
@@ -70,7 +79,7 @@ describe('Network', function(){
             assert.throws(function() { network.run([1,2,3,4]); }, Error);
         });
 
-        it('should return an Array of 1 value between 0 and 1', function(){
+        it('should return an Array of 1 value between 0 and 1', function() {
             var network = new Network();
             var results = network.run([1]);
             assert.ok(results instanceof Array);
@@ -80,7 +89,7 @@ describe('Network', function(){
             });
         });
 
-        it('should return an Array of 3 value between 0 and 1', function(){
+        it('should return an Array of 3 value between 0 and 1', function() {
             var network = new Network({
                 numberOfOutputs: 3,
             });
@@ -92,7 +101,7 @@ describe('Network', function(){
             });
         });
 
-        it('should return an Array of 5 value between 0 and 1', function(){
+        it('should return an Array of 5 value between 0 and 1', function() {
             var network = new Network({
                 numberOfInputs: 3,
                 numberOfOutputs: 5,
@@ -107,9 +116,9 @@ describe('Network', function(){
 
     });
 
-    describe('#export', function(){
+    describe('#export', function() {
 
-        it('should return an options object', function(){
+        it('should return an options object', function() {
             var options = {
                 numberOfInputs: 1,
                 numberOfOutputs: 1,
@@ -132,9 +141,26 @@ describe('Network', function(){
 
     });
 
-    describe('#update', function(){
+    describe('#size', function() {
 
-        it('should import weights', function(){
+        it('should the network size', function() {
+            var options = {
+                numberOfInputs: 1,
+                numberOfOutputs: 1,
+                numberOfHiddenLayers: 1,
+                numberOfNeuronsPerHiddenLayer: 1,
+            };
+
+            var network = new Network(options);
+
+            assert.strictEqual(network.size(), network.export().weights.length);
+        });
+
+    });
+
+    describe('#update', function() {
+
+        it('should import weights', function() {
             var expectedOptions = {
                 numberOfInputs: 1,
                 numberOfOutputs: 1,
@@ -167,6 +193,33 @@ describe('Network', function(){
             ]);
 
             assert.deepEqual(expectedOptions, network.export());
+        });
+
+        it('should throw an exception', function() {
+            var options = {
+                numberOfInputs: 1,
+                numberOfOutputs: 1,
+                numberOfHiddenLayers: 1,
+                numberOfNeuronsPerHiddenLayer: 1,
+                weights: [
+                    0.042384160216897726,
+                    -0.4777564317919314,
+                    0.5611297953873873,
+                    -0.30416952446103096,
+                    -0.6487653669901192,
+                    0.18558572605252266
+                ]
+            };
+
+            var network = new Network(options);
+
+            assert.throws(function() { 
+                network.update([
+                    0.042384160216897726,
+                    -0.4777564317919314,
+                ]);
+            });
+
         });
 
     });

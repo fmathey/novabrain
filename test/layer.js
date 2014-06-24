@@ -4,21 +4,21 @@ var Neuron = require('./../src/neuron');
 var Layer  = require('./../src/layer');
 
 
-describe('Layer', function(){
+describe('Layer', function() {
 
-    describe('#constructor', function(){
+    describe('#constructor', function() {
 
-        it('should throw an exception when invalid params are given', function(){
+        it('should throw an exception when invalid params are given', function() {
             assert.throws(function() { new Layer(); }, Error);
             assert.throws(function() { new Layer(0); }, Error);
             assert.throws(function() { new Layer(0, 0); }, Error);
         });
 
-        it('should be an Array instance', function(){
+        it('should be an Array instance', function() {
             assert.ok(new Layer(1, 1) instanceof Array);
         });
 
-        it('should push 1 neuron of 2 inputs (+1 bias) between -1 and 1', function(){
+        it('should push 1 neuron of 2 inputs (+1 bias) between -1 and 1', function() {
             var numberOfNeurons = 1;
             var numberOfInputsPerNeuron = 2;
             var layer = new Layer(numberOfNeurons, numberOfInputsPerNeuron);
@@ -32,7 +32,7 @@ describe('Layer', function(){
             });
         });
 
-        it('should push 2 neuron of 4 inputs (+1 bias) between -1 and 1', function(){
+        it('should push 2 neuron of 4 inputs (+1 bias) between -1 and 1', function() {
             var numberOfNeurons = 2;
             var numberOfInputsPerNeuron = 4;
             var layer = new Layer(numberOfNeurons, numberOfInputsPerNeuron);
@@ -45,7 +45,7 @@ describe('Layer', function(){
             });
         });
 
-        it('should push 12 neuron of 24 inputs (+1 bias) between -1 and 1', function(){
+        it('should push 12 neuron of 24 inputs (+1 bias) between -1 and 1', function() {
             var numberOfNeurons = 12;
             var numberOfInputsPerNeuron = 24;
             var layer = new Layer(numberOfNeurons, numberOfInputsPerNeuron);
@@ -59,9 +59,9 @@ describe('Layer', function(){
         });
     });
 
-    describe('#run', function(){
+    describe('#run', function() {
 
-        it('should throw an exception if the input param is not an array', function(){
+        it('should throw an exception if the input param is not an array', function() {
             var layer = new Layer(1, 1);
             assert.throws(function() { layer.run(); }, Error);
             assert.throws(function() { layer.run({}); }, Error);
@@ -71,7 +71,7 @@ describe('Layer', function(){
             assert.throws(function() { layer.run('foo'); }, Error);
         });
 
-        it('should throw an exception if the input array length is different of the neuron inputs number', function(){
+        it('should throw an exception if the input array length is different of the neuron inputs number', function() {
             var layer = new Layer(1, 1);
             assert.throws(function() { layer.run([]); }, Error);
             assert.throws(function() { layer.run([1,2]); }, Error);
@@ -104,7 +104,7 @@ describe('Layer', function(){
             assert.throws(function() { layer.run([1,2,3,4]); }, Error);
         });
 
-        it('should return an array of 3 values', function(){
+        it('should return an array of 3 values', function() {
             var layer = new Layer(3, 3);
             var results = layer.run([1,2,3]);
             assert.ok(results instanceof Array);
@@ -114,7 +114,7 @@ describe('Layer', function(){
             });
         });
 
-        it('should return an array of 9 values', function(){
+        it('should return an array of 9 values', function() {
             var layer = new Layer(9, 6);
             var results = layer.run([1,2,3,5,6,8]);
             assert.ok(results instanceof Array);
