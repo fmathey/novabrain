@@ -1,8 +1,8 @@
 {
     "name": "novabrain",
-    "version": "0.1.6",
+    "version": "0.2.0",
     "id": "novabrain",
-    "_id": "novabrain@0.1.6",
+    "_id": "novabrain@0.2.0",
     "_from": "novabrain@*",
     "description": "Neural network module",
     "keywords": [

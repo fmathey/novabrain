@@ -1,151 +1,264 @@
 
-var fs    = require('fs');
-var Layer = require('./layer');
-
 //
 // Network
 //
-// Set of layers
+// Neural Network
 //
 // @param Object : Network options
 //
 var Network = module.exports = function(options) {
+
     options = options || {};
+
     if (options instanceof Network) {
         options = options.export();
     }
-    this.options = {};
-    this.options.numberOfInputs = options.numberOfInputs || 1;
-    this.options.numberOfOutputs = options.numberOfOutputs || 1;
-    this.options.numberOfHiddenLayers = options.numberOfHiddenLayers || 1;
-    this.options.numberOfNeuronsPerHiddenLayer = options.numberOfNeuronsPerHiddenLayer || 1;
 
-    // Input layer
-    this.push(new Layer(this.options.numberOfInputs, 1));
+    options.numberOfInputs = options.numberOfInputs || 1;
+    options.numberOfOutputs = options.numberOfOutputs || 1;
+    options.numberOfHiddenLayers = options.numberOfHiddenLayers || 1;
+    options.numberOfNeuronsPerHiddenLayer = options.numberOfNeuronsPerHiddenLayer || 1;
 
-    // Hidden Layers
-    for (var i = 0; i < this.options.numberOfHiddenLayers; i++) {
-        if (i === 0) {
-            this.push(new Layer(
-                this.options.numberOfNeuronsPerHiddenLayer,
-                this.options.numberOfInputs
-            ));
-        } else {
-            this.push(new Layer(
-                this.options.numberOfNeuronsPerHiddenLayer,
-                this.options.numberOfNeuronsPerHiddenLayer
-            ));
+    var __size    = NetworkHelper.size(options);
+    var __layers  = NetworkHelper.makeLayers(options);
+    var __weights = [];
+
+    if (Array.isArray(options.weights) && options.weights.length) {
+        if (options.weights.length !== __size) {
+            throw new Error('Network expected an array of ' + __size + ' weights');
+        }
+        __weights = options.weights.slice();
+    } else {
+        for (var i = 0; i < __size; i++) {
+            __weights.push(NetworkHelper.random());
         }
     }
 
-    // Output layer
-    this.push(new Layer(
-        this.options.numberOfOutputs,
-        this.options.numberOfNeuronsPerHiddenLayer
-    ));
+    var me = {};
 
-    //Import all the weights
-    if(options && options.weights && Array.isArray(options.weights) && options.weights.length) {
-        this.update(options.weights);
-    }
+    //
+    // Network > size
+    //
+    // Returns the network size
+    // 
+    // @return Integer
+    //
+    me.size = function() {
+        return __size;
+    };
+
+    //
+    // Network > export
+    //
+    // Returns network options with all weights
+    // 
+    // @return Object 
+    //
+    me.export = function() {
+        return {
+            numberOfInputs: options.numberOfInputs,
+            numberOfOutputs: options.numberOfOutputs,
+            numberOfHiddenLayers: options.numberOfHiddenLayers,
+            numberOfNeuronsPerHiddenLayer: options.numberOfNeuronsPerHiddenLayer,
+            weights: __weights.slice(),
+        }
+    };
+
+    //
+    // Network > update
+    //
+    // Update all network weights;
+    // 
+    // @param  Array : Weights array
+    // @return Network 
+    //
+    me.update = function(weights) {
+        if (!(Array.isArray(weights) && weights.length === __size)) {
+            throw new Error('Network::update expected an array of ' + __size + ' weights');
+        }
+        __weights = weights.slice();
+        return this;
+    };
+
+    //
+    // Network > run
+    //
+    // Returns an array of sigmoid values
+    // 
+    // @param  Array : Input values
+    // @return Array
+    //
+    me.run = function(input) {
+
+        if (!(Array.isArray(input) && input.length === options.numberOfInputs)) {
+            throw new Error('Network::run expected an array of ' + options.numberOfInputs);
+        }
+
+        var results = NetworkHelper.runLayerAsInput(__weights, __layers[0], input);
+        for (var i = 1; i < __layers.length; i++) {
+            results = NetworkHelper.runLayer(__weights, __layers[i], results);
+        }
+        return results;
+    };
+
+    return me;
 };
 
 //
-// Network prototype inherit from Array
+// NetworkHelper
 //
-Network.prototype = Object.create(Array.prototype);
+// Private namespace
+//
+var NetworkHelper = {};
 
 //
-// Network > size
+// NetworkHelper > size
 //
-// Returns the network size
+// Returns the network size from options
 // 
+// @param  Object : Network options
 // @return Integer
 //
-Network.prototype.size = function() {
+NetworkHelper.size = function(options) {
     var size = 0;
-    size += this.options.numberOfInputs + this.options.numberOfInputs;
-    size += this.options.numberOfNeuronsPerHiddenLayer * (this.options.numberOfInputs + 1);
-    size += this.options.numberOfOutputs * (this.options.numberOfNeuronsPerHiddenLayer + 1);
-    if (this.options.numberOfHiddenLayers > 1) {
-        size += this.options.numberOfNeuronsPerHiddenLayer *
-            (this.options.numberOfNeuronsPerHiddenLayer + 1) *
-            (this.options.numberOfHiddenLayers - 1);
+    size += options.numberOfInputs + options.numberOfInputs;
+    size += options.numberOfNeuronsPerHiddenLayer * (options.numberOfInputs + 1);
+    size += options.numberOfOutputs * (options.numberOfNeuronsPerHiddenLayer + 1);
+    if (options.numberOfHiddenLayers > 1) {
+        size += options.numberOfNeuronsPerHiddenLayer *
+            (options.numberOfNeuronsPerHiddenLayer + 1) *
+            (options.numberOfHiddenLayers - 1);
     }
     return size;
 };
 
 //
-// Network > run
+// NetworkHelper > makeLayers
 //
-// Returns an array of sigmoid values
+// Returns the network layers composition from options
 // 
-// @param  Array : Input values
+// @param  Object : Network options
 // @return Array
 //
-Network.prototype.run = function(input) {
-
-    if (!(Array.isArray(input) && input.length === this.options.numberOfInputs)) {
-        throw new Error('Network::run expected an array of ' + this.options.numberOfInputs);
-    }
-
-    var results = this[0].runAsInput(input);
+NetworkHelper.makeLayers = function(options) {
+    var layers  = [];
+    var offset  = 0;
+    var neurons = [];
     
-    for (var i = 1, imax = this.length; i < imax; i ++) {
-        results = this[i].run(results);
+    offset = NetworkHelper.pushLayer(layers, offset, options.numberOfInputs, 1);
+    
+    for (var i = 0; i < options.numberOfHiddenLayers; i++) {
+        if (i === 0) {
+            offset = NetworkHelper.pushLayer(
+                layers,
+                offset,
+                options.numberOfNeuronsPerHiddenLayer,
+                options.numberOfInputs
+            );
+        } else {
+            offset = NetworkHelper.pushLayer(
+                layers,
+                offset,
+                options.numberOfNeuronsPerHiddenLayer,
+                options.numberOfNeuronsPerHiddenLayer
+            );
+        }
     }
+    
+    NetworkHelper.pushLayer(
+        layers,
+        offset, 
+        options.numberOfOutputs,
+        options.numberOfNeuronsPerHiddenLayer
+    );
+    
+    return layers;
+};
 
+//
+// NetworkHelper > pushLayer
+//
+// Insert a new layer
+// 
+// @param  Object : Network options
+// @return Array
+//
+NetworkHelper.pushLayer = function (layers, offset, nbNeurons, nbInputsPerNeuron) {
+    var layer = [];
+    var from  = 0;
+    var to    = 0;
+    for (var i = 0; i < nbNeurons; i++) {
+        from = offset;
+        for (var j = 0; j < nbInputsPerNeuron; j++) {
+            to   = from + nbInputsPerNeuron;
+            offset = to + 1;
+        }
+        layer.push([from, to]);
+    }
+    layers.push(layer);
+    return offset;
+};
+
+//
+// NetworkHelper > runLayer
+//
+// Returns an array of neurons activation from input
+// 
+// @param  Array : Network weights
+// @param  Array : Network layers
+// @param  Array : Inputs data
+// @return Array
+//
+NetworkHelper.runLayer = function(__weights, layer, input) {
+    var results = [];
+    layer.forEach(function(neuron) {
+        results.push(NetworkHelper.getActivation(__weights.slice(neuron[0], neuron[1] + 1), input));
+    });
     return results;
 };
 
 //
-// Network > export
+// NetworkHelper > runLayerAsInput
 //
-// Returns network options with all weights
+// Returns an array of neurons activation from neurons layer
 // 
-// @return Object 
+// @param  Array : Network weights
+// @param  Array : Network layers
+// @param  Array : Inputs data
+// @return Array
 //
-Network.prototype.export = function() {
-
-    var opts = {
-        numberOfInputs: this.options.numberOfInputs,
-        numberOfOutputs: this.options.numberOfOutputs,
-        numberOfHiddenLayers: this.options.numberOfHiddenLayers,
-        numberOfNeuronsPerHiddenLayer: this.options.numberOfNeuronsPerHiddenLayer,
-        weights: [],
-    };
-
-    this.forEach(function(layer) {
-        layer.forEach(function(neuron) {
-            neuron.forEach(function(weight) {
-                opts.weights.push(weight);
-            });
-        });
+NetworkHelper.runLayerAsInput = function(__weights, layer, input) {
+    var results = [];
+    layer.forEach(function(neuron, i) {
+        results.push(NetworkHelper.getActivation(__weights.slice(neuron[0], neuron[1] + 1), [input[i]]));
     });
-
-    return opts;
+    return results;
 };
 
 //
-// Network > update
+// NetworkHelper > getActivation
 //
-// Update all network weights;
+// Returns a neuron activation
 // 
-// @param  Array : Weights array
-// @return Network 
+// @param  Array : Neuron weights
+// @param  Array : Inputs data
+// @return Float
 //
-Network.prototype.update = function(weights) {
-    if(!(Array.isArray(weights) && weights.length === this.size())) {
-        throw new Error('Network::import expected an array of ' + this.size() + ' values');
+NetworkHelper.getActivation = function(weights, input) {
+    var activation = weights[0]; // Bias
+    for (var i = 1, imax = weights.length; i < imax; i++) {
+        activation += input[i-1] * weights[i];
     }
-    var counter = 0;
-    this.forEach(function(layer) {
-        layer.forEach(function(neuron) {
-            neuron.forEach(function(weight, i) {
-                neuron[i] = weights[counter];
-                counter++;
-            });
-        });
-    });
-    return this;
+    return 1 / (1 + Math.exp(-activation));
+};
+
+//
+// NetworkHelper > random
+//
+// Returns a random weight
+// 
+// @return Float
+//
+NetworkHelper.random = function() {
+    return Math.random() * 2 - 1;
 };

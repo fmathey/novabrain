@@ -6,21 +6,9 @@ describe('Network', function(){
 
     describe('#constructor', function(){
 
-        it('should be an Array instance', function() {
+        it('should have 6 weight', function() {
             var network = new Network();
-            assert.ok(network instanceof Array);
-        });
-
-        it('should have 3 default layers', function() {
-            var network = new Network();
-            assert.strictEqual(network.length, 3);
-        });
-
-        it('should have 5 layers', function(){
-            var network = new Network({
-                numberOfHiddenLayers: 3
-            });
-            assert.strictEqual(network.length, 5);
+            assert.strictEqual(network.export().weights.length, 6);
         });
 
         it('should throw an exception for invalid weights', function() {
