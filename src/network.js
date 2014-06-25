@@ -11,6 +11,9 @@ var Layer = require('./layer');
 //
 var Network = module.exports = function(options) {
     options = options || {};
+    if (options instanceof Network) {
+        options = options.export();
+    }
     this.options = {};
     this.options.numberOfInputs = options.numberOfInputs || 1;
     this.options.numberOfOutputs = options.numberOfOutputs || 1;
