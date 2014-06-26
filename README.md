@@ -10,7 +10,9 @@ $ npm install novabrain
 This example shows how the neural network is trained to learn XOR with Genetic Algorithm
 
 ```javascript
-var network = new NetworkGenetic({
+var novabrain = require('novabrain');
+
+var network = new novabrain.NetworkGenetic({
     numberOfInputs: 2,
     numberOfOutputs: 1,
     numberOfHiddenLayers: 2,
