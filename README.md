@@ -10,14 +10,13 @@ $ npm install novabrain
 This example shows how the neural network is trained to learn XOR with Genetic Algorithm
 
 ```javascript
-var assert = require('assert');
 var novabrain = require('novabrain');
 
 var network = new novabrain.Network({
     numberOfInputs: 2,
     numberOfOutputs: 1,
     numberOfHiddenLayers: 2,
-    numberOfNeuronsPerHiddenLayer : 5,
+    numberOfNeuronsPerHiddenLayer : 4,
 });
 
 var trainer = new novabrain.GeneticTrainer({
@@ -39,10 +38,16 @@ trainer.train(network, [
     { input: [1,1], output: [0] },
 ]);
 
-assert.strictEqual(Math.round(network.run([0,0]) * 1) / 1, 0);
-assert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 1);
-assert.strictEqual(Math.round(network.run([1,0]) * 1) / 1, 1);
-assert.strictEqual(Math.round(network.run([1,1]) * 1) / 1, 0);
+console.log('');
+console.log('----------------------------------------------');
+console.log('XOR RESULTS');
+console.log('----------------------------------------------');
+console.log('');
+console.log('  - [ 0 , 0 ] = ', Math.round(network.run([0,0]) * 1) / 1);
+console.log('  - [ 0 , 1 ] = ', Math.round(network.run([0,1]) * 1) / 1);
+console.log('  - [ 1 , 0 ] = ', Math.round(network.run([1,0]) * 1) / 1);
+console.log('  - [ 1 , 1 ] = ', Math.round(network.run([1,1]) * 1) / 1);
+console.log('');
 ```
 
 Mocha is used for unit testing
