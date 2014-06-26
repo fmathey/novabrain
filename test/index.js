@@ -1,3 +1,3 @@
 
 require('./network');
-require('./trainers/genetic');
+require('./network-genetic');

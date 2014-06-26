@@ -1,7 +1,6 @@
 
 var assert  = require('assert');
-var Network = require('./../../src/network');
-var Trainer = require('./../../src/trainers/genetic');
+var Network = require('./../src/network-genetic');
 
 describe('Genetic Trainer', function(){
 
@@ -13,18 +12,14 @@ describe('Genetic Trainer', function(){
                 numberOfOutputs: 1,
                 numberOfHiddenLayers: 2,
                 numberOfNeuronsPerHiddenLayer: 5,
-            };
-
-            var trainerOptions = {
                 populationSize : 400,
-                maxIterations  : 2000,
-                mutationRate   : 0.8,
+                maxIterations  : 1000,
+                mutationRate   : 0.9,
                 survivalRate   : 0.3,
                 maxPerbutation : 0.9,
             };
 
             var network  = new Network(networkOptions);
-            var trainer  = new Trainer(trainerOptions);
 
             var training = [ 
                 { input: [0,0], output: [0] },
@@ -33,7 +28,7 @@ describe('Genetic Trainer', function(){
                 { input: [1,1], output: [0] },
             ];
 
-            trainer.train(network, training);
+            network.train(training);
 
             assert.strictEqual(Math.round(network.run([0,0]) * 1) / 1, 0);
             assert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 1);
@@ -47,18 +42,14 @@ describe('Genetic Trainer', function(){
                 numberOfOutputs: 1,
                 numberOfHiddenLayers: 2,
                 numberOfNeuronsPerHiddenLayer: 5,
-            };
-
-            var trainerOptions = {
                 populationSize : 400,
-                maxIterations  : 2000,
+                maxIterations  : 1000,
                 mutationRate   : 0.8,
                 survivalRate   : 0.3,
                 maxPerbutation : 0.9,
             };
 
-            var network  = new Network(networkOptions);
-            var trainer  = new Trainer(trainerOptions);
+            var network = new Network(networkOptions);
 
             var training = [ 
                 { input: [0,0], output: [0] },
@@ -67,7 +58,7 @@ describe('Genetic Trainer', function(){
                 { input: [1,1], output: [1] },
             ];
 
-            trainer.train(network, training);
+            network.train(training);
 
             assert.strictEqual(Math.round(network.run([0,0]) * 1) / 1, 0);
             assert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 0);
@@ -81,18 +72,14 @@ describe('Genetic Trainer', function(){
                 numberOfOutputs: 1,
                 numberOfHiddenLayers: 2,
                 numberOfNeuronsPerHiddenLayer: 5,
-            };
-
-            var trainerOptions = {
                 populationSize : 400,
-                maxIterations  : 2000,
+                maxIterations  : 1000,
                 mutationRate   : 0.8,
                 survivalRate   : 0.3,
                 maxPerbutation : 0.9,
             };
 
-            var network  = new Network(networkOptions);
-            var trainer  = new Trainer(trainerOptions);
+            var network = new Network(networkOptions);
 
             var training = [ 
                 { input: [0,0], output: [0] },
@@ -101,7 +88,7 @@ describe('Genetic Trainer', function(){
                 { input: [1,1], output: [1] },
             ];
 
-            trainer.train(network, training);
+            network.train(training);
 
             assert.strictEqual(Math.round(network.run([0,0]) * 1) / 1, 0);
             assert.strictEqual(Math.round(network.run([0,1]) * 1) / 1, 1);
@@ -114,20 +101,16 @@ describe('Genetic Trainer', function(){
                 numberOfInputs: 4,
                 numberOfOutputs: 1,
                 numberOfHiddenLayers: 1,
-                numberOfNeuronsPerHiddenLayer: 1,
-            };
-
-            var trainerOptions = {
+                numberOfNeuronsPerHiddenLayer: 2,
                 populationSize : 200,
-                maxIterations  : 20000,
+                maxIterations  : 500,
                 mutationRate   : 0.3,
                 survivalRate   : 0.3,
                 maxPerbutation : 0.3,
-                thresholdError : 0.015,
+                errorThreshold : 0.015,
             };
 
             var network  = new Network(networkOptions);
-            var trainer  = new Trainer(trainerOptions);
             var inputs   = [ 0.5099887, 0.4566693, 0.3764133, 0.2705677 ];
             var expected = 0.19;
 
@@ -140,7 +123,7 @@ describe('Genetic Trainer', function(){
                 { input: [ 0.5349539, 0.5099887, 0.4566693, 0.3764133 ], output: [ 0.2705677 ] },
             ];
 
-            trainer.train(network, training);
+            network.train(training);
 
             assert.ok(network.run(inputs) > 0.15); // 0.19
             assert.ok(network.run(inputs) < 0.22); // 0.19

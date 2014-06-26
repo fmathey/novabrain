@@ -9,6 +9,7 @@ describe('Network', function(){
         it('should have 6 weight', function() {
             var network = new Network();
             assert.strictEqual(network.export().weights.length, 6);
+            assert.strictEqual(network.size, 6);
         });
 
         it('should throw an exception for invalid weights', function() {
@@ -125,23 +126,6 @@ describe('Network', function(){
             var network = new Network(options);
 
             assert.deepEqual(options, network.export());
-        });
-
-    });
-
-    describe('#size', function() {
-
-        it('should the network size', function() {
-            var options = {
-                numberOfInputs: 1,
-                numberOfOutputs: 1,
-                numberOfHiddenLayers: 1,
-                numberOfNeuronsPerHiddenLayer: 1,
-            };
-
-            var network = new Network(options);
-
-            assert.strictEqual(network.size(), network.export().weights.length);
         });
 
     });

@@ -1,3 +1,3 @@
 
 exports.Network = require('./src/network');
-exports.GeneticTrainer = require('./src/trainers/genetic');
+exports.NetworkGenetic = require('./src/network-genetic');
