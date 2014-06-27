@@ -55,6 +55,7 @@ Mocha is used for unit testing
 $ npm install mocha -g
 $ mocha
 $ mocha test
-$ mocha test/neuron
+$ mocha test/base-network
+$ mocha test/genetic-network
 $ ...
 ```
