@@ -15,7 +15,6 @@ var GeneticNetwork = module.exports = function(options) {
     this.maxPerbutation = options.maxPerbutation || 0.6;
     this.survivalRate   = options.survivalRate   || 0.3;
     this.errorThreshold = options.errorThreshold || 0.005;
-    this.floodCallback  = options.floodCallback  || null;
 };
 
 //
@@ -32,7 +31,7 @@ GeneticNetwork.prototype = Object.create(BaseNetwork.prototype);
 // @param  Array :training data
 // @return Object
 //
-GeneticNetwork.prototype.train = function(training) {
+GeneticNetwork.prototype.train = function(training, floodCallback) {
 
     if (!(Array.isArray(training) && training.length > 0)) {
         throw new Error('GeneticNetwork::train expected a training array');
@@ -57,8 +56,8 @@ GeneticNetwork.prototype.train = function(training) {
 
             networks[j].__fitness = error;
 
-            if (this.floodCallback && typeof this.floodCallback === 'function') {
-                this.floodCallback({
+            if (floodCallback && typeof floodCallback === 'function') {
+                floodCallback({
                     iteration: iteration,
                     fitness: networks[j].__fitness,
                 });
@@ -81,6 +80,29 @@ GeneticNetwork.prototype.train = function(training) {
     return {
         iteration: iteration,
         fitness: networks[0].__fitness,
+    };
+};
+
+//
+// GeneticNetwork > export
+//
+// Returns network options with all weights
+// 
+// @return Object 
+//
+GeneticNetwork.prototype.export = function() {
+    return {
+        numberOfInputs: this.numberOfInputs,
+        numberOfOutputs: this.numberOfOutputs,
+        numberOfHiddenLayers: this.numberOfHiddenLayers,
+        numberOfNeuronsPerHiddenLayer: this.numberOfNeuronsPerHiddenLayer,
+        populationSize: this.populationSize,
+        maxIterations: this.maxIterations,
+        mutationRate: this.mutationRate,
+        maxPerbutation: this.maxPerbutation,
+        survivalRate: this.survivalRate,
+        errorThreshold: this.errorThreshold,
+        weights: this.weights.slice(),
     };
 };
 

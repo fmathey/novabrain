@@ -23,9 +23,6 @@ var network = new novabrain.GeneticNetwork({
     maxPerbutation : 0.9,
     survivalRate   : 0.3,
     errorThreshold : 0.005,
-    floodCallback  : function(data) {
-        console.log(data);
-    }
 });
 
 network.train([ 
@@ -33,7 +30,9 @@ network.train([
     { input: [0,1], output: [1] },
     { input: [1,0], output: [1] },
     { input: [1,1], output: [0] },
-]);
+], function(data) {
+    console.log(data);
+});
 
 console.log('');
 console.log('----------------------------------------------');
@@ -44,6 +43,10 @@ console.log('  - [ 0 , 0 ] = ', Math.round(network.run([0,0]) * 1) / 1);
 console.log('  - [ 0 , 1 ] = ', Math.round(network.run([0,1]) * 1) / 1);
 console.log('  - [ 1 , 0 ] = ', Math.round(network.run([1,0]) * 1) / 1);
 console.log('  - [ 1 , 1 ] = ', Math.round(network.run([1,1]) * 1) / 1);
+console.log('');
+console.log('----------------------------------------------');
+console.log('');
+console.log(network.export());
 console.log('');
 ```
 
