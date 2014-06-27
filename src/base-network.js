@@ -112,6 +112,174 @@ BaseNetwork.prototype.run = function(input) {
 BaseNetwork.helper = {};
 
 //
+// BaseNetwork > helper > index
+//
+// Returns the network index composition from options
+// 
+// @param  Object : BaseNetwork options
+// @return Array
+//
+BaseNetwork.helper.index = function(options) {
+    var index   = [];
+    var offset  = 0;
+    var neurons = [];
+
+    var push = function (offset, nbNeurons, nbInputsPerNeuron) {
+        var data = [];
+        var from = 0;
+        var to   = 0;
+        for (var i = 0; i < nbNeurons; i++) {
+            from = offset;
+            for (var j = 0; j < nbInputsPerNeuron; j++) {
+                to   = from + nbInputsPerNeuron;
+                offset = to + 1;
+            }
+            data.push([from, to]);
+        }
+        index.push(data);
+        return offset;
+    };
+    
+    offset = push(offset, options.numberOfInputs, 1);
+    
+    for (var i = 0; i < options.numberOfHiddenLayers; i++) {
+        if (i === 0) {
+            offset = push(
+                offset,
+                options.numberOfNeuronsPerHiddenLayer,
+                options.numberOfInputs
+            );
+        } else {
+            offset = push(
+                offset,
+                options.numberOfNeuronsPerHiddenLayer,
+                options.numberOfNeuronsPerHiddenLayer
+            );
+        }
+    }
+    
+    push(
+        offset, 
+        options.numberOfOutputs,
+        options.numberOfNeuronsPerHiddenLayer
+    );
+    
+    return index;
+};
+
+//
+// BaseNetwork > helper > slice
+//
+// Returns an array of weights between from & to
+// 
+// @param  BaseNetwork
+// @param  Integer : From index
+// @param  Integer : To index
+// @return Array
+//
+BaseNetwork.helper.slice = function(network, from, to) {
+    return network.weights.slice(from, to + 1);
+};
+
+//
+// BaseNetwork > helper > getLayerWeights
+//
+// Returns an array of weights from layer
+// 
+// @param  BaseNetwork
+// @param  Array : Layer composition
+// @return Array
+//
+BaseNetwork.helper.getLayerWeights = function(network, layer) {
+    var from = layer[0][0];
+    var to   = layer[layer.length - 1][1];
+    return BaseNetwork.helper.slice(network, from, to);
+};
+
+//
+// BaseNetwork > helper > getLayerWeights
+//
+// Returns an array of weights from layer
+// 
+// @param  BaseNetwork
+// @param  Array : Neuron composition
+// @return Array
+//
+BaseNetwork.helper.getNeuronWeights = function(network, neuron) {
+    return BaseNetwork.helper.slice(network, neuron[0], neuron[1]);
+};
+
+//
+// BaseNetwork > helper > runLayer
+//
+// Returns an array of neurons activation from input
+// 
+// @param  BaseNetwork
+// @param  Array : Layer compostion
+// @param  Array : Inputs data
+// @return Array
+//
+BaseNetwork.helper.runLayer = function(network, layer, input) {
+    var results = [];
+    layer.forEach(function(neuron) {
+        results.push(BaseNetwork.helper.runNeuron(network, neuron, input));
+    });
+    return results;
+};
+
+//
+// BaseNetwork > helper > runLayerAsInput
+//
+// Returns an array of neurons activation from neurons layer
+// 
+// @param  BaseNetwork
+// @param  Array : Layer compostion
+// @param  Array : Inputs data
+// @return Array
+//
+BaseNetwork.helper.runLayerAsInput = function(network, layer, input) {
+    var results = [];
+    layer.forEach(function(neuron, i) {
+        results.push(BaseNetwork.helper.runNeuron(network, neuron, [input[i]]));
+    });
+    return results;
+};
+
+//
+// BaseNetwork > helper > runNeuron
+//
+// Returns an activation value from neuron
+// 
+// @param  BaseNetwork
+// @param  Array : Layer compostion
+// @param  Array : Inputs data
+// @return Array
+//
+BaseNetwork.helper.runNeuron = function(network, neuron, input) {
+    return BaseNetwork.helper.getSigmoidActivation(
+        BaseNetwork.helper.getNeuronWeights(network, neuron),
+        input
+    );
+};
+
+//
+// BaseNetwork > helper > getSigmoidActivation
+//
+// Returns an activation value from weights
+// 
+// @param  Array : Weights
+// @param  Array : Inputs data
+// @return Float
+//
+BaseNetwork.helper.getSigmoidActivation = function(weights, input) {
+    var activation = weights[0]; // Bias
+    for (var i = 1, imax = weights.length; i < imax; i++) {
+        activation += input[i-1] * weights[i];
+    }
+    return 1 / (1 + Math.exp(-activation));
+};
+
+//
 // BaseNetwork > helper > getRandomWeight
 //
 // Returns a random weight
@@ -173,111 +341,3 @@ BaseNetwork.helper.assertInputs = function(input, size) {
     }
 };
 
-//
-// BaseNetwork > helper > getSigmoidActivation
-//
-// Returns a weights sum activation
-// 
-// @param  Array : Weights
-// @param  Array : Inputs data
-// @return Float
-//
-BaseNetwork.helper.getSigmoidActivation = function(weights, input) {
-    var activation = weights[0]; // Bias
-    for (var i = 1, imax = weights.length; i < imax; i++) {
-        activation += input[i-1] * weights[i];
-    }
-    return 1 / (1 + Math.exp(-activation));
-};
-
-//
-// BaseNetwork > helper > index
-//
-// Returns the network index composition from options
-// 
-// @param  Object : BaseNetwork options
-// @return Array
-//
-BaseNetwork.helper.index = function(options) {
-    var index   = [];
-    var offset  = 0;
-    var neurons = [];
-
-    var push = function (offset, nbNeurons, nbInputsPerNeuron) {
-        var data = [];
-        var from = 0;
-        var to   = 0;
-        for (var i = 0; i < nbNeurons; i++) {
-            from = offset;
-            for (var j = 0; j < nbInputsPerNeuron; j++) {
-                to   = from + nbInputsPerNeuron;
-                offset = to + 1;
-            }
-            data.push([from, to]);
-        }
-        index.push(data);
-        return offset;
-    };
-    
-    offset = push(offset, options.numberOfInputs, 1);
-    
-    for (var i = 0; i < options.numberOfHiddenLayers; i++) {
-        if (i === 0) {
-            offset = push(
-                offset,
-                options.numberOfNeuronsPerHiddenLayer,
-                options.numberOfInputs
-            );
-        } else {
-            offset = push(
-                offset,
-                options.numberOfNeuronsPerHiddenLayer,
-                options.numberOfNeuronsPerHiddenLayer
-            );
-        }
-    }
-    
-    push(
-        offset, 
-        options.numberOfOutputs,
-        options.numberOfNeuronsPerHiddenLayer
-    );
-    
-    return index;
-};
-
-//
-// BaseNetwork > helper > runLayer
-//
-// Returns an array of neurons activation from input
-// 
-// @param  BaseNetwork
-// @param  Array : Layer compostion
-// @param  Array : Inputs data
-// @return Array
-//
-BaseNetwork.helper.runLayer = function(network, layer, input) {
-    var results = [];
-    layer.forEach(function(neuron) {
-        results.push(BaseNetwork.helper.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), input));
-    });
-    return results;
-};
-
-//
-// BaseNetwork > helper > runLayerAsInput
-//
-// Returns an array of neurons activation from neurons layer
-// 
-// @param  BaseNetwork
-// @param  Array : Layer compostion
-// @param  Array : Inputs data
-// @return Array
-//
-BaseNetwork.helper.runLayerAsInput = function(network, layer, input) {
-    var results = [];
-    layer.forEach(function(neuron, i) {
-        results.push(BaseNetwork.helper.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), [input[i]]));
-    });
-    return results;
-};
