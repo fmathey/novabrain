@@ -15,6 +15,13 @@ var GeneticNetwork = module.exports = function(options) {
     this.maxPerbutation = options.maxPerbutation || 0.6;
     this.survivalRate   = options.survivalRate   || 0.3;
     this.errorThreshold = options.errorThreshold || 0.005;
+
+    Object.defineProperty(this, "populationSize", { writable: false });
+    Object.defineProperty(this, "maxIterations", { writable: false });
+    Object.defineProperty(this, "mutationRate", { writable: false });
+    Object.defineProperty(this, "maxPerbutation", { writable: false });
+    Object.defineProperty(this, "survivalRate", { writable: false });
+    Object.defineProperty(this, "errorThreshold", { writable: false });
 };
 
 //
