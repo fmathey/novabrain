@@ -1,3 +1,3 @@
 
-require('./network');
-require('./network-genetic');
+require('./base-network');
+require('./genetic-network');

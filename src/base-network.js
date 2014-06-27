@@ -1,6 +1,6 @@
 
 //
-// Network
+// BaseNetwork
 //
 // Neural Network Base
 //
@@ -21,11 +21,11 @@
 //
 // @param Object : Network options
 //
-var Network = module.exports = function(options) {
+var BaseNetwork = module.exports = function(options) {
 
     options = options || {};
 
-    if (options instanceof Network) {
+    if (options instanceof BaseNetwork) {
         options = options.export();
     }
 
@@ -34,16 +34,16 @@ var Network = module.exports = function(options) {
     this.numberOfHiddenLayers = options.numberOfHiddenLayers || 1;
     this.numberOfNeuronsPerHiddenLayer = options.numberOfNeuronsPerHiddenLayer || 1;
 
-    this.size = Network.helpers.getSizeFromOptions(this);
-    this.index = Network.helpers.index(this);
+    this.size = BaseNetwork.helper.getSizeFromOptions(this);
+    this.index = BaseNetwork.helper.index(this);
     this.weights = [];
 
     if (Array.isArray(options.weights) && options.weights.length) {
-        Network.helpers.assertWeights(options.weights, this.size);
+        BaseNetwork.helper.assertWeights(options.weights, this.size);
         this.weights = options.weights.slice();
     } else {
         for (var i = 0; i < this.size; i++) {
-            this.weights.push(Network.helpers.getRandomWeight());
+            this.weights.push(BaseNetwork.helper.getRandomWeight());
         }
     }
 
@@ -55,13 +55,13 @@ var Network = module.exports = function(options) {
 };
 
 //
-// Network > export
+// BaseNetwork > export
 //
 // Returns network options with all weights
 // 
 // @return Object 
 //
-Network.prototype.export = function() {
+BaseNetwork.prototype.export = function() {
     return {
         numberOfInputs: this.numberOfInputs,
         numberOfOutputs: this.numberOfOutputs,
@@ -72,65 +72,65 @@ Network.prototype.export = function() {
 };
 
 //
-// Network > update
+// BaseNetwork > update
 //
 // Update all network weights
 // 
 // @param  Array : Weights array
-// @return Network 
+// @return BaseNetwork 
 //
-Network.prototype.update = function(weights) {
-    Network.helpers.assertWeights(weights, this.size);
+BaseNetwork.prototype.update = function(weights) {
+    BaseNetwork.helper.assertWeights(weights, this.size);
     this.weights = weights.slice();
     return this;
 };
 
 //
-// Network > run
+// BaseNetwork > run
 //
 // Returns an array of sigmoid values
 // 
 // @param  Array : Input values
 // @return Array
 //
-Network.prototype.run = function(input) {
+BaseNetwork.prototype.run = function(input) {
 
-    Network.helpers.assertInputs(input, this.numberOfInputs);
+    BaseNetwork.helper.assertInputs(input, this.numberOfInputs);
 
-    var results = Network.helpers.runLayerAsInput(this, this.index[0], input);
+    var results = BaseNetwork.helper.runLayerAsInput(this, this.index[0], input);
     
     for (var i = 1; i < this.index.length; i++) {
-        results = Network.helpers.runLayer(this, this.index[i], results);
+        results = BaseNetwork.helper.runLayer(this, this.index[i], results);
     }
     
     return results;
 };
 
 //
-// Network helpers namespace
+// BaseNetwork helper namespace
 //
-Network.helpers = {};
+BaseNetwork.helper = {};
 
 //
-// Network > helpers > getRandomWeight
+// BaseNetwork > helper > getRandomWeight
 //
 // Returns a random weight
 // 
 // @return Float
 //
-Network.helpers.getRandomWeight = function() {
+BaseNetwork.helper.getRandomWeight = function() {
     return Math.random() * 2 - 1;
 };
 
 //
-// Network > helpers > size
+// BaseNetwork > helper > size
 //
 // Returns the network size from options
 // 
-// @param  Object : Network options
+// @param  Object : BaseNetwork options
 // @return Integer
 //
-Network.helpers.getSizeFromOptions = function(options) {
+BaseNetwork.helper.getSizeFromOptions = function(options) {
     var size = 0;
     size  = options.numberOfInputs + options.numberOfInputs;
     size += options.numberOfNeuronsPerHiddenLayer * (options.numberOfInputs + 1);
@@ -144,7 +144,7 @@ Network.helpers.getSizeFromOptions = function(options) {
 };
 
 //
-// Network > helpers > assertWeights
+// BaseNetwork > helper > assertWeights
 //
 // Throw an exception if weigths array length is bad
 // 
@@ -152,14 +152,14 @@ Network.helpers.getSizeFromOptions = function(options) {
 // @param Integer : Expected size
 // @throw Error
 //
-Network.helpers.assertWeights = function(weights, size) {
+BaseNetwork.helper.assertWeights = function(weights, size) {
     if (!(Array.isArray(weights) && weights.length === size)) {
         throw new Error('Need an array of ' + size + ' weights');
     }
 };
 
 //
-// Network > helpers > assertInputs
+// BaseNetwork > helper > assertInputs
 //
 // Throw an exception if inputs array length is bad
 // 
@@ -167,14 +167,14 @@ Network.helpers.assertWeights = function(weights, size) {
 // @param Integer : Expected size
 // @throw Error
 //
-Network.helpers.assertInputs = function(input, size) {
+BaseNetwork.helper.assertInputs = function(input, size) {
     if (!(Array.isArray(input) && input.length === size)) {
         throw new Error('Need an array of ' + size + ' inputs');
     }
 };
 
 //
-// Network > helpers > getSigmoidActivation
+// BaseNetwork > helper > getSigmoidActivation
 //
 // Returns a weights sum activation
 // 
@@ -182,7 +182,7 @@ Network.helpers.assertInputs = function(input, size) {
 // @param  Array : Inputs data
 // @return Float
 //
-Network.helpers.getSigmoidActivation = function(weights, input) {
+BaseNetwork.helper.getSigmoidActivation = function(weights, input) {
     var activation = weights[0]; // Bias
     for (var i = 1, imax = weights.length; i < imax; i++) {
         activation += input[i-1] * weights[i];
@@ -191,14 +191,14 @@ Network.helpers.getSigmoidActivation = function(weights, input) {
 };
 
 //
-// Network > helpers > index
+// BaseNetwork > helper > index
 //
 // Returns the network index composition from options
 // 
-// @param  Object : Network options
+// @param  Object : BaseNetwork options
 // @return Array
 //
-Network.helpers.index = function(options) {
+BaseNetwork.helper.index = function(options) {
     var index   = [];
     var offset  = 0;
     var neurons = [];
@@ -247,37 +247,37 @@ Network.helpers.index = function(options) {
 };
 
 //
-// Network > helpers > runLayer
+// BaseNetwork > helper > runLayer
 //
 // Returns an array of neurons activation from input
 // 
-// @param  Network
+// @param  BaseNetwork
 // @param  Array : Layer compostion
 // @param  Array : Inputs data
 // @return Array
 //
-Network.helpers.runLayer = function(network, layer, input) {
+BaseNetwork.helper.runLayer = function(network, layer, input) {
     var results = [];
     layer.forEach(function(neuron) {
-        results.push(Network.helpers.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), input));
+        results.push(BaseNetwork.helper.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), input));
     });
     return results;
 };
 
 //
-// Network > helpers > runLayerAsInput
+// BaseNetwork > helper > runLayerAsInput
 //
 // Returns an array of neurons activation from neurons layer
 // 
-// @param  Network
+// @param  BaseNetwork
 // @param  Array : Layer compostion
 // @param  Array : Inputs data
 // @return Array
 //
-Network.helpers.runLayerAsInput = function(network, layer, input) {
+BaseNetwork.helper.runLayerAsInput = function(network, layer, input) {
     var results = [];
     layer.forEach(function(neuron, i) {
-        results.push(Network.helpers.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), [input[i]]));
+        results.push(BaseNetwork.helper.getSigmoidActivation(network.weights.slice(neuron[0], neuron[1] + 1), [input[i]]));
     });
     return results;
 };

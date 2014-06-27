@@ -1,8 +1,8 @@
 
 var assert = require('assert');
-var Network = require('./../src/network');
+var Network = require('./../src/base-network');
 
-describe('Network', function(){
+describe('BaseNetwork', function(){
 
     describe('#constructor', function(){
 

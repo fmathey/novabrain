@@ -1,8 +1,8 @@
 
 var assert  = require('assert');
-var Network = require('./../src/network-genetic');
+var Network = require('./../src/genetic-network');
 
-describe('Genetic Trainer', function(){
+describe('Genetic Network', function(){
 
     describe('#train', function(){
 

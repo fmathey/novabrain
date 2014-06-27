@@ -1,13 +1,13 @@
 
-var Network = require('./network');
+var BaseNetwork = require('./base-network');
 
-var NetworkGenetic = module.exports = function(options) {
+var GeneticNetwork = module.exports = function(options) {
 
     var self = this;
 
     options = options || {};
 
-    Network.call(this, options);
+    BaseNetwork.call(this, options);
 
     this.populationSize = options.populationSize || 400;
     this.maxIterations  = options.maxIterations  || 1000;
@@ -19,29 +19,29 @@ var NetworkGenetic = module.exports = function(options) {
 };
 
 //
-// Inherit of Network
+// Inherit of BaseNetwork
 //
-NetworkGenetic.prototype = Object.create(Network.prototype);
+GeneticNetwork.prototype = Object.create(BaseNetwork.prototype);
 
 //
 // GeneticTrainer > train
 //
 // Returns an array of sigmoid values
 // 
-// @param  Network
+// @param  BaseNetwork
 // @param  Array :training data
 // @return Object
 //
-NetworkGenetic.prototype.train = function(training) {
+GeneticNetwork.prototype.train = function(training) {
 
     if (!(Array.isArray(training) && training.length > 0)) {
-        throw new Error('NetworkGenetic::train expected a training array');
+        throw new Error('GeneticNetwork::train expected a training array');
     }
 
     var networks = [];
 
     for (var i = 0; i < this.populationSize; i++) {
-        networks.push(new Network(this));
+        networks.push(new BaseNetwork(this));
     }
 
     var iteration = 0;
@@ -52,7 +52,7 @@ NetworkGenetic.prototype.train = function(training) {
             var error = 0;
             for (var k = 0; k < training.length; k++) {
                 var results = networks[j].run(training[k].input);
-                error += NetworkGenetic.helpers.getErrorRate(results, training[k].output);
+                error += GeneticNetwork.helper.getErrorRate(results, training[k].output);
             };
 
             networks[j].__fitness = error;
@@ -72,7 +72,7 @@ NetworkGenetic.prototype.train = function(training) {
                 }
             }
         };
-        networks = NetworkGenetic.helpers.makeNewGeneration(networks, this);
+        networks = GeneticNetwork.helper.makeNewGeneration(networks, this);
         iteration++;
     }
 
@@ -85,12 +85,12 @@ NetworkGenetic.prototype.train = function(training) {
 };
 
 //
-// NetworkGenetic helpers namespace
+// GeneticNetwork helper namespace inherits from BaseNetwork.helper
 //
-NetworkGenetic.helpers = Network.helpers;
+GeneticNetwork.helper = BaseNetwork.helper;
 
 //
-// NetworkGenetic > helper > getErrorRate
+// GeneticNetwork > helper > getErrorRate
 //
 // Returns errors sum
 // 
@@ -98,7 +98,7 @@ NetworkGenetic.helpers = Network.helpers;
 // @param  Array
 // @return Float
 //
-NetworkGenetic.helpers.getErrorRate = function (a, b) {
+GeneticNetwork.helper.getErrorRate = function (a, b) {
     var sumError = 0;
     for (var i = a.length - 1; i >= 0; i--) {
         sumError += Math.abs(a[i] - b[i]);
@@ -107,7 +107,7 @@ NetworkGenetic.helpers.getErrorRate = function (a, b) {
 };
 
 //
-// NetworkGenetic > helper > mergeWeights
+// GeneticNetwork > helper > mergeWeights
 //
 // Returns merged weights
 // 
@@ -115,7 +115,7 @@ NetworkGenetic.helpers.getErrorRate = function (a, b) {
 // @param  Array : Weights list
 // @return Array : All weights
 //
-NetworkGenetic.helpers.mergeWeights = function(a, b) {
+GeneticNetwork.helper.mergeWeights = function(a, b) {
     var result = [];
     var aLength = Math.ceil(a.length / 2);
     var bLength = Math.floor(b.length / 2);
@@ -129,7 +129,7 @@ NetworkGenetic.helpers.mergeWeights = function(a, b) {
 };
 
 //
-// NetworkGenetic > helper > mutateWeights
+// GeneticNetwork > helper > mutateWeights
 //
 // Returns mutated weights
 // 
@@ -137,11 +137,11 @@ NetworkGenetic.helpers.mergeWeights = function(a, b) {
 // @param  Object : Trainer options
 // @return Array  : Mutated weights
 //
-NetworkGenetic.helpers.mutateWeights = function(weights, options) {
+GeneticNetwork.helper.mutateWeights = function(weights, options) {
     var mutated = [];
     weights.forEach(function(weight) {
         if(Math.random() < options.mutationRate) {
-            mutated.push(weight + (NetworkGenetic.helpers.getRandomWeight() * options.maxPerbutation));
+            mutated.push(weight + (GeneticNetwork.helper.getRandomWeight() * options.maxPerbutation));
         } else {
             mutated.push(weight);
         }
@@ -150,7 +150,7 @@ NetworkGenetic.helpers.mutateWeights = function(weights, options) {
 };
 
 //
-// NetworkGenetic > helper > mutateWeights
+// GeneticNetwork > helper > mutateWeights
 //
 // Returns mutated weights
 // 
@@ -158,7 +158,7 @@ NetworkGenetic.helpers.mutateWeights = function(weights, options) {
 // @param  Object : Trainer options
 // @return Array  : List of new generation Networks
 //
-NetworkGenetic.helpers.makeNewGeneration = function (networks, options) {
+GeneticNetwork.helper.makeNewGeneration = function (networks, options) {
 
     networks.sort(function(a, b) { return a.__fitness - b.__fitness; });
 
@@ -171,9 +171,9 @@ NetworkGenetic.helpers.makeNewGeneration = function (networks, options) {
         var optionsA = networks[Math.floor(Math.random() * kills)];
         var optionsB = networks[Math.floor(Math.random() * kills)];
         var optionsC = optionsA.export();
-        var combined = NetworkGenetic.helpers.mergeWeights(optionsA.weights, optionsB.weights);
-        optionsC.weights = NetworkGenetic.helpers.mutateWeights(combined, options);
-        networks.push(new Network(optionsC));
+        var combined = GeneticNetwork.helper.mergeWeights(optionsA.weights, optionsB.weights);
+        optionsC.weights = GeneticNetwork.helper.mutateWeights(combined, options);
+        networks.push(new BaseNetwork(optionsC));
     }
 
     return networks;

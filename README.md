@@ -12,7 +12,7 @@ This example shows how the neural network is trained to learn XOR with Genetic A
 ```javascript
 var novabrain = require('novabrain');
 
-var network = new novabrain.NetworkGenetic({
+var network = new novabrain.GeneticNetwork({
     numberOfInputs: 2,
     numberOfOutputs: 1,
     numberOfHiddenLayers: 2,
@@ -20,8 +20,8 @@ var network = new novabrain.NetworkGenetic({
     populationSize : 400,
     maxIterations  : 2000,
     mutationRate   : 0.9,
-    survivalRate   : 0.3,
     maxPerbutation : 0.9,
+    survivalRate   : 0.3,
     errorThreshold : 0.005,
     floodCallback  : function(data) {
         console.log(data);
