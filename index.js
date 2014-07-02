@@ -1,3 +1,2 @@
 
-exports.BaseNetwork = require('./src/base-network');
-exports.GeneticNetwork = require('./src/genetic-network');
+exports.Network = require('./src/network');
