@@ -11,21 +11,9 @@ This example shows how the neural network is trained to learn XOR with Genetic A
 
 ```javascript
 var novabrain = require('novabrain');
+var network = new novabrain.Network();
 
-var network = new novabrain.GeneticNetwork({
-    numberOfInputs: 2,
-    numberOfOutputs: 1,
-    numberOfHiddenLayers: 2,
-    numberOfNeuronsPerHiddenLayer : 5,
-    populationSize : 400,
-    maxIterations  : 2000,
-    mutationRate   : 0.9,
-    maxPerbutation : 0.9,
-    survivalRate   : 0.3,
-    errorThreshold : 0.005,
-});
-
-network.train([ 
+network.train([
     { input: [0,0], output: [0] },
     { input: [0,1], output: [1] },
     { input: [1,0], output: [1] },
@@ -45,8 +33,6 @@ console.log('  - [ 1 , 0 ] = ', Math.round(network.run([1,0]) * 1) / 1);
 console.log('  - [ 1 , 1 ] = ', Math.round(network.run([1,1]) * 1) / 1);
 console.log('');
 console.log('----------------------------------------------');
-console.log('');
-console.log(network.export());
 console.log('');
 ```
 
