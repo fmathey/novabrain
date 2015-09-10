@@ -1,7 +1,7 @@
 
-var novabrain = require('./index');
+var Novabrain = require('../index');
 
-var network = new novabrain.Network();
+var network = new Novabrain.Network();
 
 network.train([
     { input: [0,0], output: [0] },

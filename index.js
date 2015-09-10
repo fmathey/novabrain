@@ -1,2 +1,3 @@
+require('babel/register');
 
-exports.Network = require('./src/network');
+exports.Network = require('./source/Network.js');

@@ -10,8 +10,8 @@ $ npm install novabrain
 This example shows how the neural network is trained to learn XOR
 
 ```javascript
-var novabrain = require('novabrain');
-var network   = new novabrain.Network();
+var Novabrain = require('novabrain');
+var network   = new Novabrain.Network();
 
 network.train([
     { input: [0,0], output: [0] },
@@ -57,6 +57,5 @@ console.log('');
 ```
 $ npm install mocha -g
 $ mocha
-$ mocha test
 $ ...
 ```

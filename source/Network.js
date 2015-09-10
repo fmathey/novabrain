@@ -1,21 +1,25 @@
+var NetworkHelper = require('./NetworkHelper.js');
+
 //
 // A class representing a Neural Network.
 //
 // @param options.inputSize    >> The number of inputs in this neural network
-// @param options.hiddenSize   >> The number of neurons int the hidden layer
 // @param options.outputSize   >> The number of outputs in this neural network
+// @param options.hiddenSize   >> The number of neurons by hidden layer
 // @param options.layers       >> Optional, the layers used in the initial state (otherwise random)
 //
 //      {
 //         inputSize  : 2,                 
-//         hiddenSize : 3,
 //         outputSize : 1,
+//         hiddenSize : 3,
 //         layers     : [],
 //      }
 //
-var Network = module.exports = function(__options) {
-
-    var me = {};
+class Network {
+    
+    constructor(options) {
+        this.configure(options);
+    }
 
     //
     // Network > configure
@@ -24,23 +28,25 @@ var Network = module.exports = function(__options) {
     // 
     // @return this
     //
-    this.configure = function(options) {
+    configure(options) {
+
+        options = options || {};
         
         if (options instanceof Network) {
-            me = options.export();
+            options = options.toJSON();
+        }
+
+        this.inputSize  = options.inputSize  || this.inputSize  || 2;
+        this.hiddenSize = options.hiddenSize || this.hiddenSize || Math.max(3, Math.floor(this.inputSize / 2));
+        this.outputSize = options.outputSize || this.outputSize || 1;
+
+        if (Array.isArray(options.layers)) {
+            this.layers = JSON.parse(JSON.stringify(options.layers));
         } else {
-            options = options || {};
-            me.inputSize  = options.inputSize  || me.inputSize  || 2;
-            me.hiddenSize = options.hiddenSize || me.hiddenSize || Math.max(3, Math.floor(me.inputSize / 2));
-            me.outputSize = options.outputSize || me.outputSize || 1;
-            if (Array.isArray(options.layers)) {
-                me.layers = JSON.parse(JSON.stringify(options.layers));
-            } else {
-                me.layers = [];
-                me.layers[0] = Network.createLayer(me.inputSize, 1);
-                me.layers[1] = Network.createLayer(me.hiddenSize, me.layers[0].length);
-                me.layers[2] = Network.createLayer(me.outputSize, me.layers[1].length);
-            }
+            this.layers = [];
+            this.layers[0] = NetworkHelper.createLayer(this.inputSize, 1);
+            this.layers[1] = NetworkHelper.createLayer(this.hiddenSize, this.layers[0].length);
+            this.layers[2] = NetworkHelper.createLayer(this.outputSize, this.layers[1].length);
         }
 
         return this;
@@ -54,33 +60,19 @@ var Network = module.exports = function(__options) {
     // @param  Array : Input values
     // @return Array
     //
-    this.run = function(input) {
-        if (!Array.isArray(me.layers)) {
+    run(input) {
+        if (!Array.isArray(this.layers)) {
             throw new Error('Network must be initialized with options or trained');
         }
-        if (!(Array.isArray(input) && input.length === me.inputSize)) {
-            throw new Error('Network::run expected an array of ' + me.inputSize + ' inputs');
+        if (!(Array.isArray(input) && input.length === this.inputSize)) {
+            throw new Error('Network::run expected an array of ' + this.inputSize + ' inputs');
         }
         var outputs = [];
-        for (var layerId = 1; layerId < me.layers.length; layerId++) {
-            outputs = input = Network.outputLayer(me.layers[layerId], input);
+        for (var layerId = 1; layerId < this.layers.length; layerId++) {
+            outputs = input = NetworkHelper.outputLayer(this.layers[layerId], input);
         }
         return outputs;
-    };
-
-    //
-    // Network > export
-    //
-    // Returns network options
-    // 
-    // @return Object 
-    //
-    this.export = function() {
-        return JSON.parse(JSON.stringify(me, function(key,value) {
-            if (key=="changes") return undefined;
-            else return value;
-        }));
-    };
+    }
 
     //
     // Network > train
@@ -96,7 +88,7 @@ var Network = module.exports = function(__options) {
     // @param  options.interval   : Callback function interval
     // @return Object
     //
-    this.train = function(data, options) {
+    train(data, options) {
 
         options = options || {};
         options.iterations = options.iterations || 20000;
@@ -107,7 +99,7 @@ var Network = module.exports = function(__options) {
         options.interval   = options.interval   || 10;
 
         // Init the network with training data
-        if (!Array.isArray(me.layers)) {
+        if (Array.isArray(this.layers)) {
             this.configure({
                 inputSize  : data[0].input.length,
                 hiddenSize : Math.max(3, Math.floor(data[0].input.length / 2)),
@@ -115,12 +107,12 @@ var Network = module.exports = function(__options) {
             });
         }
 
-        if (!(Array.isArray(data[0].input) && data[0].input.length === me.inputSize)) {
-            throw new Error('Network::run expected an array of ' + me.inputSize + ' inputs');
+        if (!(Array.isArray(data[0].input) && data[0].input.length === this.inputSize)) {
+            throw new Error('Network::run expected an array of ' + this.inputSize + ' inputs');
         }
 
-        if (!(Array.isArray(data[0].output) && data[0].output.length === me.outputSize)) {
-            throw new Error('Network::run expected an array of ' + me.outputSize + ' outputs');
+        if (!(Array.isArray(data[0].output) && data[0].output.length === this.outputSize)) {
+            throw new Error('Network::run expected an array of ' + this.outputSize + ' outputs');
         }
 
         var gerror  = 10;
@@ -135,22 +127,22 @@ var Network = module.exports = function(__options) {
                 var target   = data[j].output;
                 var errors   = [];
                 var deltas   = [];
-                var outputs  = Network.getOutputs(me.layers, input);
+                var outputs  = NetworkHelper.getOutputs(this.layers, input);
 
                 // Calculate errors and deltas
 
-                for (var layerId = me.layers.length - 1; layerId >= 0; layerId--) {
+                for (var layerId = this.layers.length - 1; layerId >= 0; layerId--) {
                     errors[layerId] = [];
                     deltas[layerId] = [];
-                    for (var neuronId = 0; neuronId < me.layers[layerId].length; neuronId++) {
+                    for (var neuronId = 0; neuronId < this.layers[layerId].length; neuronId++) {
                         var output = outputs[layerId][neuronId];
                         var nerror = 0;
-                        if (layerId === me.layers.length - 1) {
+                        if (layerId === this.layers.length - 1) {
                             nerror = target[neuronId] - output;
                         } else {
                             var d = deltas[layerId + 1];
                             for (var k = 0; k < d.length; k++) {
-                                nerror += d[k] * me.layers[layerId + 1][k].weights[neuronId];
+                                nerror += d[k] * this.layers[layerId + 1][k].weights[neuronId];
                             }
                         }
                         errors[layerId][neuronId] = nerror;
@@ -161,13 +153,13 @@ var Network = module.exports = function(__options) {
                 // Back propagate
                 // Store neuron changes for the next backprop
 
-                for (var layerId = 1; layerId < me.layers.length; layerId++) {
+                for (var layerId = 1; layerId < this.layers.length; layerId++) {
                     var incoming = outputs[layerId - 1];
-                    for (var neuronId = 0; neuronId < me.layers[layerId].length; neuronId++) {
+                    for (var neuronId = 0; neuronId < this.layers[layerId].length; neuronId++) {
                         var delta  = deltas[layerId][neuronId];
-                        var neuron = me.layers[layerId][neuronId];
+                        var neuron = this.layers[layerId][neuronId];
                         if (!neuron.changes) {
-                            neuron.changes = Network.zeros(neuron.weights.length);
+                            neuron.changes = NetworkHelper.zeros(neuron.weights.length);
                         }
                         for (var k = 0; k < incoming.length; k++) {
                             var change = neuron.changes[k];
@@ -180,7 +172,7 @@ var Network = module.exports = function(__options) {
                 }
 
                 // Hidden layer errors sum
-                ierror += Network.getErrorSum(errors[2]);
+                ierror += NetworkHelper.getErrorSum(errors[2]);
             }
 
             // Global errors sum
@@ -192,7 +184,24 @@ var Network = module.exports = function(__options) {
         }
 
         return { error: gerror, iterations: i };
-    };
+    }
+
+    //
+    // Network > toJSON
+    //
+    // Return network options
+    //
+    // @return Object
+    //
+    toJSON() {
+        var hiddenParams = ['changes'];
+        return JSON.parse(JSON.stringify(Object.assign({}, this), function(key, value) {
+            if (hiddenParams.indexOf(key) > -1) {
+                return undefined;
+            }
+            return value;
+        }));
+    }
 
     //
     // Network > toFunction
@@ -201,12 +210,16 @@ var Network = module.exports = function(__options) {
     // 
     // @return Function
     //
-    this.toFunction = function() {
-        var layers = JSON.stringify(me.layers, function(key,value) {
+    toFunction() {
+
+        var layers = JSON.stringify(this.layers, function(key,value) {
             if (key=="changes") return undefined;
             else return value;
         });
-        var buffer = 'var layers = ' + layers + ';';
+
+        var buffer = '';
+
+        buffer += 'var layers = ' + layers + ';';
         buffer += 'for (var i = 1; i < layers.length; i++) {';
         buffer += 'var layer = layers[i];';
         buffer += 'var output = [];';
@@ -221,80 +234,9 @@ var Network = module.exports = function(__options) {
         buffer += 'input = output;';
         buffer += '}';
         buffer += 'return output;';
+
         return new Function("input", buffer);
-    };
-
-    // Configure the network if some options are given
-
-    if (__options) {
-        this.configure(__options);
     }
-};
+}
 
-//-------------------------------------------------------------------------------------------------
-// Common helpers namespace
-//-------------------------------------------------------------------------------------------------
-
-
-Network.random = function(size) {
-    size = size || 0.4;
-    return Math.random() * size - (size / 2);
-};
-
-Network.randos = function(size) {
-    var results = [];
-    for (var i = 0; i < size; i++) {
-        results.push(Network.random());
-    }
-    return results;
-};
-
-Network.zeros = function(size) {
-    var results = [];
-    for (var i = 0; i < size; i++) {
-        results.push(0);
-    }
-    return results;
-};
-
-Network.createLayer = function(numberOfNeurons, inputSizePerNeuron) {
-    var layer = [];
-    for (var i = 0; i < numberOfNeurons; i++) {
-        layer[i] = {
-            bias: Network.random(),
-            weights: Network.randos(inputSizePerNeuron),
-            changes: Network.zeros(inputSizePerNeuron),
-        };
-    }
-    return layer;
-};
-
-Network.outputLayer = function(layer, input) {
-    var results = [];
-    for (var neuronId = 0; neuronId < layer.length; neuronId++) {
-        var neuron = layer[neuronId];
-        var result = neuron.bias;
-        for (var k = 0; k < neuron.weights.length; k++) {
-            result += neuron.weights[k] * input[k];
-        }
-        results.push(1 / (1 + Math.exp(-result)));
-    }
-    return results;
-};
-
-Network.getOutputs = function(layers, input) {
-    var outputs = [];
-    var output  = outputs[0] = input.slice();
-    for (var layerId = 1; layerId < layers.length; layerId++) {
-        output = outputs[layerId] = Network.outputLayer(layers[layerId], output);
-    }
-    return outputs;
-};
-
-Network.getErrorSum = function(errors) {
-    var sum = 0;
-    for (var i = 0; i < errors.length; i++) {
-        sum += Math.pow(errors[i], 2);
-    }
-    return sum / errors.length;
-};
+module.exports = Network;
