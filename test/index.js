@@ -1,3 +1,7 @@
 require('babel/register');
 
-require('./network.js');
+require('./neuron');
+require('./layer');
+require('./network');
+require('./trainer');
+require('./transfer');

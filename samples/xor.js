@@ -1,43 +1,25 @@
+var Novabrain = require('./../index');
 
-var Novabrain = require('../index');
+var network = new Novabrain.Network(2,1);
+var trainer = new Novabrain.Trainer(network);
 
-var network = new Novabrain.Network();
-
-network.train([
+trainer.train([
     { input: [0,0], output: [0] },
     { input: [0,1], output: [1] },
     { input: [1,0], output: [1] },
     { input: [1,1], output: [0] },
-], {
-    callback: function(data) {
-        console.log(data);
-    }
-});
+]);
 
-console.log('');
-console.log('----------------------------------------------');
-console.log('NETWORK RUN XOR');
-console.log('----------------------------------------------');
-console.log('');
-console.log('  - [ 0 , 0 ] = ', Math.round(network.run([0,0]) * 1) / 1);
-console.log('  - [ 0 , 1 ] = ', Math.round(network.run([0,1]) * 1) / 1);
-console.log('  - [ 1 , 0 ] = ', Math.round(network.run([1,0]) * 1) / 1);
-console.log('  - [ 1 , 1 ] = ', Math.round(network.run([1,1]) * 1) / 1);
-console.log('');
-console.log('----------------------------------------------');
-console.log('');
+// Use default transfer LOGISITIC
 
-var run = network.toFunction();
+console.log([0,0], network.output([0,0])); // [~0.05]
+console.log([0,1], network.output([0,1])); // [~0.93]
+console.log([1,0], network.output([1,0])); // [~0.93]
+console.log([1,1], network.output([1,1])); // [~0.09]
 
-console.log('');
-console.log('----------------------------------------------');
-console.log('STANDALONE FUNCTION RUN XOR');
-console.log('----------------------------------------------');
-console.log('');
-console.log('  - [ 0 , 0 ] = ', Math.round(run([0,0]) * 1) / 1);
-console.log('  - [ 0 , 1 ] = ', Math.round(run([0,1]) * 1) / 1);
-console.log('  - [ 1 , 0 ] = ', Math.round(run([1,0]) * 1) / 1);
-console.log('  - [ 1 , 1 ] = ', Math.round(run([1,1]) * 1) / 1);
-console.log('');
-console.log('----------------------------------------------');
-console.log('');
+network.transfer = Novabrain.Transfer.BOOLEAN;
+
+console.log([0,0], network.output([0,0])); // [false]
+console.log([0,1], network.output([0,1])); // [true]
+console.log([1,0], network.output([1,0])); // [true]
+console.log([1,1], network.output([1,1])); // [false]

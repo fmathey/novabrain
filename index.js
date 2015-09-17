@@ -1,3 +1,3 @@
 require('babel/register');
 
-exports.Network = require('./source/Network.js');
+module.exports = require('./source/novabrain');
