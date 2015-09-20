@@ -1,24 +1,10 @@
-var assert = require('assert');
+var assert    = require('assert');
 var Novabrain = require('./../index');
-var Network = Novabrain.Network;
-var Layer   = Novabrain.Layer;
-var Trainer = Novabrain.Trainer;
-var Transfer = Novabrain.Transfer;
-
-var networkConfigTest = [
-    [
-        {bias: -0.13752707047387958, weights: [0.19243250247091054]},
-        {bias: -0.07921435488387943, weights: [0.16750794807448982]}
-    ],
-    [
-        {bias: 0.05040031857788563, weights: [-0.19811222013086083, -0.06754875825718046]},
-        {bias: -0.008431669883429999, weights: [-0.09689404666423798, -0.1895773339085281]},
-        {bias: -0.19032581867650153, weights: [0.17723346007987856, 0.08597935801371931]}
-    ],
-    [
-        {bias: -0.08970609167590737, weights: [0.018543000426143402, 0.0574993586167693, -0.13078986080363392]}
-    ]
-];
+var Network   = Novabrain.Network;
+var Layer     = Novabrain.Layer;
+var Trainer   = Novabrain.Trainer;
+var Transfer  = Novabrain.Transfer;
+var Samples   = Novabrain.Samples;
 
 describe('Network', function() {
 
@@ -88,15 +74,15 @@ describe('Network', function() {
         });
 
         it('should return the defined values', function () {
-            var network = (new Network(2,1)).import(networkConfigTest);
+            var network = (new Network(2,1)).import(Samples.XOR.config);
             var results = network.output([0.2,0.4]);
-            assert.deepEqual(results, [0.47135421428669444]);
+            assert.deepEqual(results, [0.9153394100871207]);
         });
 
         it('should return transfered values', function () {
-            var network = (new Network(2,1)).import(networkConfigTest);
+            var network = (new Network(2,1)).import(Samples.OR.config);
             var results = network.output([0.2,0.4], Transfer.HARDLIMIT);
-            assert.deepEqual(results, [0]);
+            assert.deepEqual(results, [1]);
         });
 
     });
@@ -105,8 +91,8 @@ describe('Network', function() {
 
         it('should return an array of layers', function () {
             var network = new Network(2, 1);
-            network.import(networkConfigTest);
-            assert.deepEqual(network.export(), networkConfigTest);
+            network.import(Samples.AND.config);
+            assert.deepEqual(network.export(), Samples.AND.config);
             assert.strictEqual(network.export().length, 3);
         });
     });
@@ -144,7 +130,7 @@ describe('Network', function() {
         it('should not throw Error', function () {
             var network = new Network(2,1);
             assert.doesNotThrow(function() {
-                network.import(networkConfigTest);
+                network.import(Samples.XOR.config);
             });
         });
 
@@ -152,7 +138,7 @@ describe('Network', function() {
             var n1 = new Network(2,1);
             var n2 = new Network(2,1);
             assert.doesNotThrow(function() {
-                n1.import(networkConfigTest);
+                n1.import(Samples.AND.config);
             });
             assert.doesNotThrow(function() {
                 n2.import(n1);
@@ -173,18 +159,18 @@ describe('Network', function() {
         });
 
         it('should return the defined values', function () {
-            var network = (new Network(2,1)).import(networkConfigTest);
+            var network = (new Network(2,1)).import(Samples.AND.config);
             var results = network.output([0.2,0.4]);
             var standalone = network.standalone();
-            assert.deepEqual(results, [ 0.47135421428669444 ]);
+            assert.deepEqual(results, [ 0.009320581820383993 ]);
             assert.deepEqual(standalone([0.2,0.4]), results);
         });
 
         it('should return transfered values', function () {
-            var network = (new Network(2,1)).import(networkConfigTest);
+            var network = (new Network(2,1)).import(Samples.OR.config);
             var results = network.output([0.2,0.4], Transfer.BOOLEAN);
             var standalone = network.standalone();
-            assert.deepEqual(results, [ false ]);
+            assert.deepEqual(results, [ true ]);
             assert.deepEqual(standalone([0.2,0.4], Transfer.BOOLEAN), results);
         });
 

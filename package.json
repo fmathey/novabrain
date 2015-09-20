@@ -1,8 +1,8 @@
 {
   "name": "novabrain",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "id": "novabrain",
-  "_id": "novabrain@0.7.0",
+  "_id": "novabrain@0.7.1",
   "_from": "novabrain@*",
   "description": "Neural network library for NodeJS and browser",
   "keywords": [

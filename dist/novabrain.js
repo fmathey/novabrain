@@ -52,7 +52,8 @@ var Novabrain =
 	    Layer: __webpack_require__(3),
 	    Network: __webpack_require__(4),
 	    Trainer: __webpack_require__(5),
-	    Transfer: __webpack_require__(2)
+	    Transfer: __webpack_require__(2),
+	    Samples: __webpack_require__(6)
 	};
 
 /***/ },
@@ -350,32 +351,41 @@ var Novabrain =
 	        this.outputSize = network.layers[network.layers.length - 1].neurons.length;
 	        this.nbLayers = this.network.layers.length;
 	        this.lastLayerId = this.nbLayers - 1;
-	
-	        this.training = {
-	            changes: [],
-	            iteration: {
-	                errors: [],
-	                deltas: []
-	            }
-	        };
+	        this.errors = [];
+	        this.deltas = [];
+	        this.changes = [];
 	    }
 	
-	    //
-	    // Trainer.train
-	    //
-	    // Train the network with back propagation
-	    //
-	    // @param  Array              : Training data
-	    // @param  options.iterations : The number of back propagation iterations
-	    // @param  options.learning   : Learning rate
-	    // @param  options.momentum   : Reduction rate
-	    // @param  options.treshold   : Error treshold to break iterations loop
-	    // @param  options.callback   : Callback function for log
-	    // @param  options.interval   : Callback function interval
-	    // @return Object
-	    //
-	
 	    _createClass(Trainer, [{
+	        key: 'reset',
+	        value: function reset() {
+	            this.errors = [];
+	            this.deltas = [];
+	            this.changes = this.network['export']();
+	            for (var i in this.network.layers) {
+	                for (var j in this.network.layers[i].neurons) {
+	                    for (var k in this.network.layers[i].neurons[j].weights) {
+	                        this.changes[i][j].weights[k] = 0;
+	                    }
+	                }
+	            }
+	        }
+	
+	        //
+	        // Trainer.train
+	        //
+	        // Train the network with back propagation
+	        //
+	        // @param  Array              : Training data
+	        // @param  options.iterations : The number of back propagation iterations
+	        // @param  options.learning   : Learning rate
+	        // @param  options.momentum   : Reduction rate
+	        // @param  options.treshold   : Error treshold to break iterations loop
+	        // @param  options.callback   : Callback function for log
+	        // @param  options.interval   : Callback function interval
+	        // @return Object
+	        //
+	    }, {
 	        key: 'train',
 	        value: function train(data, options) {
 	            options = options || {};
@@ -394,7 +404,7 @@ var Novabrain =
 	                throw new Error('Train expected an output data array of ' + this.outputSize);
 	            }
 	
-	            this.changes = [];
+	            this.reset();
 	
 	            var globalError = 10;
 	            var iterationsCount = 0;
@@ -407,15 +417,53 @@ var Novabrain =
 	                    var outputs = this.getOutputs(data[j].input);
 	                    var target = data[j].output;
 	
-	                    this.prepare(outputs, target);
+	                    // Calculate errors and deltas
 	
-	                    this.propagate(outputs, options.learning, options.momentum);
+	                    for (var layerId = this.lastLayerId; layerId >= 0; layerId--) {
+	                        this.errors[layerId] = [];
+	                        this.deltas[layerId] = [];
+	                        for (var neuronId = 0; neuronId < this.network.layers[layerId].neurons.length; neuronId++) {
+	                            var output = outputs[layerId][neuronId];
+	                            var neuronError = 0;
+	                            if (layerId === this.lastLayerId) {
+	                                neuronError = target[neuronId] - output;
+	                            } else {
+	                                var delta = this.deltas[layerId + 1];
+	                                for (var k = 0; k < delta.length; k++) {
+	                                    var weight = this.network.layers[layerId + 1].neurons[k].weights[neuronId];
+	                                    neuronError += delta[k] * weight;
+	                                }
+	                            }
+	                            this.errors[layerId][neuronId] = neuronError;
+	                            this.deltas[layerId][neuronId] = neuronError * output * (1 - output);
+	                        }
+	                    }
+	
+	                    // Back propagate
+	
+	                    for (var layerId = 1; layerId < this.nbLayers; layerId++) {
+	                        var incoming = outputs[layerId - 1];
+	                        var layer = this.network.layers[layerId];
+	                        for (var neuronId = 0; neuronId < layer.neurons.length; neuronId++) {
+	                            var neuron = layer.neurons[neuronId];
+	                            var delta = this.deltas[layerId][neuronId];
+	                            for (var k = 0; k < incoming.length; k++) {
+	                                var change = this.changes[layerId][neuronId][k] || 0;
+	                                change = options.learning * delta * incoming[k] + options.momentum * change;
+	                                neuron.weights[k] += change;
+	                                this.changes[layerId][neuronId][k] = change;
+	                            }
+	                            neuron.bias += options.learning * delta;
+	                        }
+	                    }
 	
 	                    // Hidden layer errors sum
-	                    iterationError += this.getErrorSum(this.training.iteration.errors[this.lastLayerId]);
+	
+	                    iterationError += this.getErrorSum(this.errors[this.lastLayerId]);
 	                }
 	
 	                // Global errors sum
+	
 	                globalError = iterationError / data.length;
 	
 	                if (options.callback && i % options.interval == 0) {
@@ -429,84 +477,6 @@ var Novabrain =
 	                error: globalError,
 	                iterations: iterationsCount
 	            };
-	        }
-	
-	        //
-	        // Calculate errors and deltas
-	        //
-	    }, {
-	        key: 'prepare',
-	        value: function prepare(outputs, target) {
-	
-	            this.training.iteration.errors = [];
-	            this.training.iteration.deltas = [];
-	
-	            for (var layerId = this.lastLayerId; layerId >= 0; layerId--) {
-	
-	                this.training.iteration.errors[layerId] = [];
-	                this.training.iteration.deltas[layerId] = [];
-	
-	                var layer = this.network.layers[layerId];
-	
-	                for (var neuronId = 0; neuronId < layer.neurons.length; neuronId++) {
-	
-	                    var output = outputs[layerId][neuronId];
-	                    var neuronError = 0;
-	
-	                    if (layerId === this.lastLayerId) {
-	                        neuronError = target[neuronId] - output;
-	                    } else {
-	                        var delta = this.training.iteration.deltas[layerId + 1];
-	                        for (var k = 0; k < delta.length; k++) {
-	                            var weight = this.network.layers[layerId + 1].neurons[k].weights[neuronId];
-	                            neuronError += delta[k] * weight;
-	                        }
-	                    }
-	                    this.training.iteration.errors[layerId][neuronId] = neuronError;
-	                    this.training.iteration.deltas[layerId][neuronId] = neuronError * output * (1 - output);
-	                }
-	            }
-	
-	            return this;
-	        }
-	
-	        //
-	        // Back propagate
-	        //
-	    }, {
-	        key: 'propagate',
-	        value: function propagate(outputs, learning, momentum) {
-	            if (this.training.changes.length !== this.nbLayers) {
-	                this.training.changes = new Array(this.nbLayers);
-	            }
-	
-	            for (var layerId = 1; layerId < this.nbLayers; layerId++) {
-	                var incoming = outputs[layerId - 1];
-	                var layer = this.network.layers[layerId];
-	
-	                if (!Array.isArray(this.training.changes[layerId])) {
-	                    this.training.changes[layerId] = new Array(layer.neurons.length);
-	                }
-	
-	                for (var neuronId = 0; neuronId < layer.neurons.length; neuronId++) {
-	                    var neuron = layer.neurons[neuronId];
-	                    var delta = this.training.iteration.deltas[layerId][neuronId];
-	
-	                    if (!Array.isArray(this.training.changes[layerId][neuronId])) {
-	                        this.training.changes[layerId][neuronId] = new Array(neuron.weights.length);
-	                    }
-	
-	                    for (var k = 0; k < incoming.length; k++) {
-	                        var change = this.training.changes[layerId][neuronId][k] || 0;
-	                        change = learning * delta * incoming[k] + momentum * change;
-	                        neuron.weights[k] += change;
-	                        this.training.changes[layerId][neuronId][k] = change;
-	                    }
-	                    neuron.bias += learning * delta;
-	                }
-	            }
-	
-	            return this;
 	        }
 	    }, {
 	        key: 'getOutputs',
@@ -533,6 +503,34 @@ var Novabrain =
 	})();
 	
 	module.exports = Trainer;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	
+	    XOR: {
+	        training: [{ input: [0, 0], output: [0] }, { input: [0, 1], output: [1] }, { input: [1, 0], output: [1] }, { input: [1, 1], output: [0] }],
+	
+	        config: [[{ bias: 0.1804561257362366, weights: [-0.167204974219203] }, { bias: -0.04569602627307176, weights: [0.18746992871165274] }], [{ bias: 4.594158542478944, weights: [-3.040062330305626, -3.362846210091373] }, { bias: 2.253482826600183, weights: [-5.98762513515333, -5.965287921412066] }, { bias: 2.2578395038508865, weights: [-2.0587523788017017, -1.562316369066697] }], [{ bias: -3.8152869540660492, weights: [5.941256505289369, -8.507284881253804, 3.1455340193310843] }]]
+	    },
+	
+	    AND: {
+	        training: [{ input: [0, 0], output: [0] }, { input: [0, 1], output: [0] }, { input: [1, 0], output: [0] }, { input: [1, 1], output: [1] }],
+	
+	        config: [[{ bias: 0.05568741559982299, weights: [-0.07880215616896749] }, { bias: 0.11339050624519587, weights: [-0.08192619075998664] }], [{ bias: 1.2162003373115722, weights: [-1.5325596790646399, -1.6694862833366626] }, { bias: 3.5218949042093537, weights: [-2.9473826605615274, -2.6480166644816325] }, { bias: 1.2894144846904376, weights: [-1.3971381146583233, -1.8841189975945027] }], [{ bias: 3.4025251093426854, weights: [-2.7717050850924494, -5.672159962134176, -2.836860716358213] }]]
+	    },
+	
+	    OR: {
+	        training: [{ input: [0, 0], output: [0] }, { input: [0, 1], output: [1] }, { input: [1, 0], output: [1] }, { input: [1, 1], output: [1] }],
+	
+	        config: [[{ bias: 0.023853175062686194, weights: [-0.05087699200958015] }, { bias: -0.04783560279756785, weights: [-0.12696466147899627] }], [{ bias: 0.7767897854256859, weights: [-1.7520145026333327, -1.7771349756367834] }, { bias: -0.47207093390546423, weights: [1.0731066688291095, 1.040178424526655] }, { bias: -1.5422804887749049, weights: [3.1529762364879015, 3.1483531621536285] }], [{ bias: -1.2640437852289894, weights: [-3.1821062179619575, 1.162433847357973, 4.845167062525612] }]]
+	    }
+	
+	};
 
 /***/ }
 /******/ ]);

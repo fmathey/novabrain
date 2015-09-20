@@ -1,8 +1,9 @@
-var assert = require('assert');
+var assert    = require('assert');
 var Novabrain = require('./../index');
-var Network = Novabrain.Network;
-var Trainer = Novabrain.Trainer;
-var Transfer = Novabrain.Transfer;
+var Network   = Novabrain.Network;
+var Trainer   = Novabrain.Trainer;
+var Transfer  = Novabrain.Transfer;
+var Samples   = Novabrain.Samples;
 
 describe('Trainer', function() {
 
@@ -18,12 +19,7 @@ describe('Trainer', function() {
 
             network.transfer = Transfer.BOOLEAN;
 
-            trainer.train([
-                { input: [0,0], output: [0] },
-                { input: [0,1], output: [1] },
-                { input: [1,0], output: [1] },
-                { input: [1,1], output: [0] },
-            ]);
+            trainer.train(Samples.XOR.training);
 
             assert.deepEqual(network.output([0,0]), [false]);
             assert.deepEqual(network.output([0,1]), [true]);
@@ -37,12 +33,7 @@ describe('Trainer', function() {
 
             network.transfer = Transfer.BOOLEAN;
 
-            trainer.train([
-                { input: [0,0], output: [0] },
-                { input: [0,1], output: [0] },
-                { input: [1,0], output: [0] },
-                { input: [1,1], output: [1] },
-            ]);
+            trainer.train(Samples.AND.training);
 
             assert.deepEqual(network.output([0,0]), [false]);
             assert.deepEqual(network.output([0,1]), [false]);
@@ -56,12 +47,7 @@ describe('Trainer', function() {
 
             network.transfer = Transfer.BOOLEAN;
 
-            trainer.train([
-                { input: [0,0], output: [0] },
-                { input: [0,1], output: [1] },
-                { input: [1,0], output: [1] },
-                { input: [1,1], output: [1] },
-            ]);
+            trainer.train(Samples.OR.training);
 
             assert.deepEqual(network.output([0,0]), [false]);
             assert.deepEqual(network.output([0,1]), [true]);

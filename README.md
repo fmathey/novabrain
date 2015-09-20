@@ -1,7 +1,9 @@
 # Novabrain
 
 Novabrain is a javascript [neural network](http://en.wikipedia.org/wiki/Artificial_neural_network) library for Node.js and browser.
-This library implements a multilayer perceptrons network that you can train to learn XOR, OR, AND ... for example.
+This library implements a **multilayer perceptron** network that you can train to learn XOR, OR, AND ... for example.
+
+![Perceptron](https://camo.githubusercontent.com/6cbf32d6b071f11cda62a15c7697f1381bf03789/687474703a2f2f7777772e636f646570726f6a6563742e636f6d2f4b422f646f746e65742f707265646963746f722f6e6574776f726b2e6a7067)
 
 #### In Node.js
 
@@ -17,17 +19,34 @@ var Layer     = Novabrain.Layer;
 var Network   = Novabrain.Network;
 var Trainer   = Novabrain.Trainer;
 var Transfer  = Novabrain.Transfer;
+var Samples   = Novabrain.Samples;
 ```
 
 #### In the browser
 
-```html
-<script type="text/javascript" src="novabrain.js"><script>
-```
-Or use the minified version
+You can also use the minified version to increase your web page loading
 
 ```html
-<script type="text/javascript" src="novabrain.min.js"><script>
+<script type="text/javascript" src="novabrain.js"></script>
+```
+
+```html
+<script type="text/javascript">
+	(function() {
+	
+		var network = new Novabrain.Network(2,1);
+		
+		network.import(Novabrain.Samples.XOR.config);
+		
+		network.transfer = Novabrain.Transfer.BOOLEAN;
+		
+		console.log([0,0], network.output([0,0])); // [false]
+		console.log([0,1], network.output([0,1])); // [true]
+		console.log([1,0], network.output([1,0])); // [true]
+		console.log([1,1], network.output([1,1])); // [false]
+		
+	})();
+</script>
 ```
 
 ### Create a network
@@ -38,9 +57,19 @@ The last value is the output size
 Between this values you can set many hidden size (2, 3, ..., 1)
 
 ```javascript
-new Network(2,1);
-new Network(2,3,1);
-new Network(5,4,4,2);
+new Novabrain.Network(2,1);
+new Novabrain.Network(2,3,1);
+new Novabrain.Network(5,4,4,2);
+```
+
+### Samples
+
+Novabrain samples contains **training** and **config** for basics functions
+
+```javascript
+Novabrain.Samples.XOR
+Novabrain.Samples.AND
+Novabrain.Samples.OR
 ```
 
 ### Back Propagation Training
@@ -48,8 +77,8 @@ new Network(5,4,4,2);
 This example shows how the neural network is trained to learn XOR
 
 ```javascript
-var network = new Network(2,1);
-var trainer = new Trainer(network);
+var network = new Novabrain.Network(2,1);
+var trainer = new Novabrain.Trainer(network);
 
 trainer.train([
     { input: [0,0], output: [0] },
@@ -63,7 +92,7 @@ console.log([0,1], network.output([0,1])); // [~0.93]
 console.log([1,0], network.output([1,0])); // [~0.93]
 console.log([1,1], network.output([1,1])); // [~0.09]
 
-network.transfer = Transfer.BOOLEAN;
+network.transfer = Novabrain.Transfer.BOOLEAN;
 
 console.log([0,0], network.output([0,0])); // [false]
 console.log([0,1], network.output([0,1])); // [true]
@@ -78,7 +107,7 @@ By default, neurons uses a Logistic Sigmoid transfer.
 You can change those properties the following way.
 
 ```javascript
-network.transfer = Transfer.BOOLEAN;
+network.transfer = Novabrain.Transfer.BOOLEAN;
 
 console.log([0,0], network.output([0,0])); // [false]
 console.log([0,1], network.output([0,1])); // [true]
@@ -86,26 +115,26 @@ console.log([1,0], network.output([1,0])); // [true]
 console.log([1,1], network.output([1,1])); // [false]
 ```
 
-[LOGISTIC](http://commons.wikimedia.org/wiki/File:SigmoidFunction.png)
+[LOGISTIC](http://commons.wikimedia.org/wiki/File:SigmoidFunction.png)  
 Return logistic sigmoid values
 
-[HARDLIMIT](http://commons.wikimedia.org/wiki/File:HardLimitFunction.png)
+[HARDLIMIT](http://commons.wikimedia.org/wiki/File:HardLimitFunction.png)  
 Return 0 or 1 values
 
-[BOOLEAN](http://commons.wikimedia.org/wiki/File:HardLimitFunction.png)
+[BOOLEAN](http://commons.wikimedia.org/wiki/File:HardLimitFunction.png)  
 Return boolean values like HARDLIMIT
 
-[IDENTIFY](http://en.wikipedia.org/wiki/File:Function-x.svg)
+[IDENTIFY](http://en.wikipedia.org/wiki/File:Function-x.svg)  
 Return sum values without transfer
 
-[TANH](http://commons.wikimedia.org/wiki/File:TanhFunction.jpg)
+[TANH](http://commons.wikimedia.org/wiki/File:TanhFunction.jpg)  
 Return values between -1 and 1 
 
 ### Export and import data
 
 ```javascript
-var n1 = new Network(2,1);
-var n2 = new Network(2,1);
+var n1 = new Novabrain.Network(2,1);
+var n2 = new Novabrain.Network(2,1);
 
 n2.import(n1);
 // or
@@ -121,13 +150,13 @@ Define your custom transfer before the standalone function export or set the tra
 
 ```javascript
 var standalone = network.standalone();
-var booleanResults = standalone([...], Transfer.BOOLEAN));
+var booleanResults = standalone([...], Novabrain.Transfer.BOOLEAN));
 ```
 
 ```javascript
-var standalone = network.standalone(Transfer.BOOLEAN);
+var standalone = network.standalone(Novabrain.Transfer.BOOLEAN);
 var booleanResults = standalone([...]));
-var tanhResults = standalone([...], Transfer.TANH));
+var tanhResults = standalone([...], Novabrain.Transfer.TANH));
 ```
 
 ### Mocha is used for unit testing
