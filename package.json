@@ -1,8 +1,8 @@
 {
   "name": "novabrain",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "id": "novabrain",
-  "_id": "novabrain@0.8.0",
+  "_id": "novabrain@0.8.1",
   "_from": "novabrain@*",
   "description": "Neural network library for NodeJS and browser",
   "keywords": [
@@ -40,7 +40,7 @@
     "test": "./node_modules/mocha/bin/mocha"
   },
   "engines": {
-    "node": ">=0.10.28"
+    "node": ">=4.1.1"
   },
   "readmeFilename": "README.md"
 }
