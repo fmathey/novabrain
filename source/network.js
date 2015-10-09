@@ -1,3 +1,5 @@
+'use strict';
+
 var Layer = require('./layer');
 var Transfer = require('./transfer');
 

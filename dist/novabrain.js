@@ -118,7 +118,7 @@ var Novabrain =
 /* 2 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	module.exports = {
 	
@@ -511,7 +511,7 @@ var Novabrain =
 /* 6 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	module.exports = {
 	

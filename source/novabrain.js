@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
     Neuron: require('./neuron'),
     Layer: require('./layer'),

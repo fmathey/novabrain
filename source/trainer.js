@@ -1,3 +1,5 @@
+'use strict';
+
 var Network = require('./network');
 
 class Trainer {

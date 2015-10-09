@@ -1,8 +1,10 @@
-var assert = require('assert');
+'use strict';
+
+var assert    = require('assert');
 var Novabrain = require('./../index');
-var Layer = Novabrain.Layer;
-var Neuron = Novabrain.Neuron;
-var Transfer = Novabrain.Transfer;
+var Layer     = Novabrain.Layer;
+var Neuron    = Novabrain.Neuron;
+var Transfer  = Novabrain.Transfer;
 
 describe('Layer', function() {
 

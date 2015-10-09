@@ -1,3 +1,5 @@
+'use strict';
+
 var Transfer = require('./transfer');
 
 class Neuron {

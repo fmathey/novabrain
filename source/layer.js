@@ -1,3 +1,5 @@
+'use strict';
+
 var Neuron = require('./neuron');
 
 class Layer {
