@@ -13,17 +13,17 @@ class Layer {
 
     output(inputs, transfer) {
         var results = [];
-        this.neurons.forEach((neuron) => {
-            results.push(neuron.output(inputs, transfer));
-        });
+        for (var i = 0; i < this.neurons.length; i++) {
+            results.push(this.neurons[i].output(inputs, transfer));
+        }
         return results;
     }
 
     export() {
         var json = [];
-        this.neurons.forEach((neuron) => {
-            json.push(neuron.export());
-        });
+        for (var i = 0; i < this.neurons.length; i++) {
+            json.push(this.neurons[i].export());
+        }
         return json;
     }
 

@@ -20,7 +20,7 @@ describe('Trainer', function() {
             var trainer = new Trainer(network);
 
             network.transfer = Transfer.BOOLEAN;
-
+            
             trainer.train(Samples.XOR.training);
 
             assert.deepEqual(network.output([0,0]), [false]);

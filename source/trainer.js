@@ -48,6 +48,7 @@ class Trainer {
     // @return Object
     //
     train(data, options) {
+
         options = options || {};
         options.iterations = options.iterations || 20000;
         options.learning   = options.learning   || 0.3;
@@ -91,9 +92,10 @@ class Trainer {
             iterationsCount++;
         }
 
+
         return {
             error: globalError,
-            iterations: iterationsCount
+            iterations: iterationsCount,
         };
     }
 
@@ -109,15 +111,18 @@ class Trainer {
         for (var layerId = this.lastLayerId; layerId >= 0; layerId--) {
             this.errors[layerId] = [];
             this.deltas[layerId] = [];
-            for (var neuronId = 0; neuronId < this.network.layers[layerId].neurons.length; neuronId++) {
+            var neurons = this.network.layers[layerId].neurons;
+            for (var neuronId = 0; neuronId < neurons.length; neuronId++) {
                 var output = outputs[layerId][neuronId];
                 var neuronError = 0;
+
                 if (layerId === this.lastLayerId) {
                     neuronError = target[neuronId] - output;
                 } else {
-                    for (var k = 0; k < this.deltas[layerId + 1].length; k++) {
-                        var weight = this.network.layers[layerId + 1].neurons[k].weights[neuronId];
-                        neuronError += this.deltas[layerId + 1][k] * weight;
+                    var deltas = this.deltas[layerId + 1];
+                    var nextLayerNeurons = this.network.layers[layerId + 1].neurons;
+                    for (var k = 0; k < deltas.length; k++) {
+                        neuronError += deltas[k] * nextLayerNeurons[k].weights[neuronId];
                     }
                 }
                 this.errors[layerId][neuronId] = neuronError;
@@ -129,12 +134,16 @@ class Trainer {
 
         for (var layerId = 1; layerId < this.nbLayers; layerId++) {
             var incoming = outputs[layerId - 1];
-            var layer = this.network.layers[layerId];
-            for (var neuronId = 0; neuronId < layer.neurons.length; neuronId++) {
-                var neuron = layer.neurons[neuronId];
+            //var layer = this.network.layers[layerId];
+            var neurons = this.network.layers[layerId].neurons;
+            for (var neuronId = 0; neuronId < neurons.length; neuronId++) {
+                var neuron = neurons[neuronId];
                 var delta  = this.deltas[layerId][neuronId];
                 for (var k = 0; k < incoming.length; k++) {
-                    var change = this.changes[layerId][neuronId][k] || 0;
+                    var change = this.changes[layerId][neuronId][k];
+                    if (change === undefined) {
+                        change = 0;
+                    }
                     change = (learning * delta * incoming[k]) + (momentum * change);
                     neuron.weights[k] += change;
                     this.changes[layerId][neuronId][k] = change;
@@ -149,17 +158,18 @@ class Trainer {
     getOutputs(inputs) {
         var outputs = [];
         var output  = outputs[0] = inputs.slice();
-        for (var i = 1; i < this.network.layers.length; i++) {
-            output = outputs[i] = this.network.layers[i].output(output);
+        var layers = this.network.layers;
+        for (var i = 1; i < layers.length; i++) {
+            output = outputs[i] = layers[i].output(output);
         }
         return outputs;
     }
 
     getErrorSum(errors) {
         var sum = 0;
-        errors.forEach((error) => {
-            sum += Math.pow(error, 2);
-        });
+        for (var i = 0; i < errors.length; i++) {
+            sum += Math.pow(errors[i], 2);
+        }
         return sum / errors.length;
     };
 
