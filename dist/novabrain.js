@@ -74,8 +74,12 @@ var Novabrain =
 	
 	        this.bias = Math.random() * 0.4 - 0.2;
 	        this.weights = [];
+	        this.changes = [];
+	        this.error = 0;
+	        this.delta = 0;
 	        for (var i = 0; i < size; i++) {
 	            this.weights.push(Math.random() * 0.4 - 0.2);
+	            this.changes.push(0);
 	        }
 	    }
 	
@@ -172,18 +176,18 @@ var Novabrain =
 	        key: 'output',
 	        value: function output(inputs, transfer) {
 	            var results = [];
-	            this.neurons.forEach(function (neuron) {
-	                results.push(neuron.output(inputs, transfer));
-	            });
+	            for (var i = 0; i < this.neurons.length; i++) {
+	                results.push(this.neurons[i].output(inputs, transfer));
+	            }
 	            return results;
 	        }
 	    }, {
 	        key: 'export',
 	        value: function _export() {
 	            var json = [];
-	            this.neurons.forEach(function (neuron) {
-	                json.push(neuron['export']());
-	            });
+	            for (var i = 0; i < this.neurons.length; i++) {
+	                json.push(this.neurons[i]['export']());
+	            }
 	            return json;
 	        }
 	    }]);
@@ -351,43 +355,27 @@ var Novabrain =
 	        this.outputSize = network.layers[network.layers.length - 1].neurons.length;
 	        this.nbLayers = this.network.layers.length;
 	        this.lastLayerId = this.nbLayers - 1;
-	        this.errors = [];
-	        this.deltas = [];
-	        this.changes = [];
 	    }
 	
-	    _createClass(Trainer, [{
-	        key: 'reset',
-	        value: function reset() {
-	            this.errors = [];
-	            this.deltas = [];
-	            this.changes = this.network['export']();
-	            for (var i in this.network.layers) {
-	                for (var j in this.network.layers[i].neurons) {
-	                    for (var k in this.network.layers[i].neurons[j].weights) {
-	                        this.changes[i][j].weights[k] = 0;
-	                    }
-	                }
-	            }
-	        }
+	    //
+	    // Trainer.train
+	    //
+	    // Train the network with back propagation
+	    //
+	    // @param  Array              : Training data
+	    // @param  options.iterations : The number of back propagation iterations
+	    // @param  options.learning   : Learning rate
+	    // @param  options.momentum   : Reduction rate
+	    // @param  options.treshold   : Error treshold to break iterations loop
+	    // @param  options.callback   : Callback function for log
+	    // @param  options.interval   : Callback function interval
+	    // @return Object
+	    //
 	
-	        //
-	        // Trainer.train
-	        //
-	        // Train the network with back propagation
-	        //
-	        // @param  Array              : Training data
-	        // @param  options.iterations : The number of back propagation iterations
-	        // @param  options.learning   : Learning rate
-	        // @param  options.momentum   : Reduction rate
-	        // @param  options.treshold   : Error treshold to break iterations loop
-	        // @param  options.callback   : Callback function for log
-	        // @param  options.interval   : Callback function interval
-	        // @return Object
-	        //
-	    }, {
+	    _createClass(Trainer, [{
 	        key: 'train',
 	        value: function train(data, options) {
+	
 	            options = options || {};
 	            options.iterations = options.iterations || 20000;
 	            options.learning = options.learning || 0.3;
@@ -403,8 +391,6 @@ var Novabrain =
 	            if (!(Array.isArray(data[0].output) && data[0].output.length === this.outputSize)) {
 	                throw new Error('Train expected an output data array of ' + this.outputSize);
 	            }
-	
-	            this.reset();
 	
 	            var globalError = 10;
 	            var iterationsCount = 0;
@@ -443,21 +429,20 @@ var Novabrain =
 	            // Calculate errors and deltas
 	
 	            for (var layerId = this.lastLayerId; layerId >= 0; layerId--) {
-	                this.errors[layerId] = [];
-	                this.deltas[layerId] = [];
-	                for (var neuronId = 0; neuronId < this.network.layers[layerId].neurons.length; neuronId++) {
+	                var neurons = this.network.layers[layerId].neurons;
+	                for (var neuronId = 0; neuronId < neurons.length; neuronId++) {
 	                    var output = outputs[layerId][neuronId];
 	                    var neuronError = 0;
 	                    if (layerId === this.lastLayerId) {
 	                        neuronError = target[neuronId] - output;
 	                    } else {
-	                        for (var k = 0; k < this.deltas[layerId + 1].length; k++) {
-	                            var weight = this.network.layers[layerId + 1].neurons[k].weights[neuronId];
-	                            neuronError += this.deltas[layerId + 1][k] * weight;
+	                        var nextLayerNeurons = this.network.layers[layerId + 1].neurons;
+	                        for (var k = 0; k < nextLayerNeurons.length; k++) {
+	                            neuronError += nextLayerNeurons[k].delta * nextLayerNeurons[k].weights[neuronId];
 	                        }
 	                    }
-	                    this.errors[layerId][neuronId] = neuronError;
-	                    this.deltas[layerId][neuronId] = neuronError * output * (1 - output);
+	                    neurons[neuronId].error = neuronError;
+	                    neurons[neuronId].delta = neuronError * output * (1 - output);
 	                }
 	            }
 	
@@ -465,29 +450,38 @@ var Novabrain =
 	
 	            for (var layerId = 1; layerId < this.nbLayers; layerId++) {
 	                var incoming = outputs[layerId - 1];
-	                var layer = this.network.layers[layerId];
-	                for (var neuronId = 0; neuronId < layer.neurons.length; neuronId++) {
-	                    var neuron = layer.neurons[neuronId];
-	                    var delta = this.deltas[layerId][neuronId];
+	                var neurons = this.network.layers[layerId].neurons;
+	                for (var neuronId = 0; neuronId < neurons.length; neuronId++) {
+	                    var neuron = neurons[neuronId];
+	                    var delta = neuron.delta;
 	                    for (var k = 0; k < incoming.length; k++) {
-	                        var change = this.changes[layerId][neuronId][k] || 0;
+	                        var change = neuron.changes[k];
 	                        change = learning * delta * incoming[k] + momentum * change;
 	                        neuron.weights[k] += change;
-	                        this.changes[layerId][neuronId][k] = change;
+	                        neuron.changes[k] = change;
 	                    }
 	                    neuron.bias += learning * delta;
 	                }
 	            }
 	
-	            return this.getErrorSum(this.errors[this.lastLayerId]);
+	            var errors = [];
+	
+	            var neurons = this.network.layers[this.lastLayerId].neurons;
+	
+	            for (var i = 0; i < neurons.length; i++) {
+	                errors.push(neurons[i].error);
+	            }
+	
+	            return this.getErrorSum(errors);
 	        }
 	    }, {
 	        key: 'getOutputs',
 	        value: function getOutputs(inputs) {
 	            var outputs = [];
 	            var output = outputs[0] = inputs.slice();
-	            for (var i = 1; i < this.network.layers.length; i++) {
-	                output = outputs[i] = this.network.layers[i].output(output);
+	            var layers = this.network.layers;
+	            for (var i = 1; i < layers.length; i++) {
+	                output = outputs[i] = layers[i].output(output);
 	            }
 	            return outputs;
 	        }
@@ -495,9 +489,9 @@ var Novabrain =
 	        key: 'getErrorSum',
 	        value: function getErrorSum(errors) {
 	            var sum = 0;
-	            errors.forEach(function (error) {
-	                sum += Math.pow(error, 2);
-	            });
+	            for (var i = 0; i < errors.length; i++) {
+	                sum += Math.pow(errors[i], 2);
+	            }
 	            return sum / errors.length;
 	        }
 	    }]);
