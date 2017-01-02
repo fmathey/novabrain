@@ -23,7 +23,7 @@ describe('Transfer', function() {
 
         it('should return transfered values', function () {
             network.transfer = Transfer.LOGISTIC;
-            assert.strictEqual(network.output(inputset[0])[0], 0.05817070272629486);
+            assert.strictEqual(network.output(inputset[0])[0], 0.05817070272629488);
             assert.strictEqual(network.output(inputset[1])[0], 0.9357947138317898);
             assert.strictEqual(network.output(inputset[2])[0], 0.9321080693260643);
             assert.strictEqual(network.output(inputset[3])[0], 0.08798035983254547);

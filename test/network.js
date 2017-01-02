@@ -164,7 +164,7 @@ describe('Network', function() {
             var network = (new Network(2,1)).import(Samples.AND.config);
             var results = network.output([0.2,0.4]);
             var standalone = network.standalone();
-            assert.deepEqual(results, [ 0.009320581820383993 ]);
+            assert.deepEqual(results, [ 0.009320581820383995 ]);
             assert.deepEqual(standalone([0.2,0.4]), results);
         });
 

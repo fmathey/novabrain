@@ -7,8 +7,12 @@ class Neuron {
     constructor(size) {
         this.bias = Math.random() * 0.4 - 0.2;
         this.weights = [];
+        this.changes = [];
+        this.error = 0;
+        this.delta = 0;
         for (var i = 0; i < size; i++) {
             this.weights.push(Math.random() * 0.4 - 0.2);
+            this.changes.push(0);
         }
     }
 
