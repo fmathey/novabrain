@@ -49,10 +49,15 @@ class Trainer {
             throw new Error('Train expected an output data array of ' + this.outputSize);
         }
 
-        var globalError = 10;
-        var iterationsCount = 0;
+        var timeStart = new Date().getTime();
 
-        for (var i = 0; i < options.iterations && globalError > options.treshold; i++) {
+        var result = {
+            error: 10,
+            iterations: 0,
+            time: 0
+        };
+
+        for (var i = 0; i < options.iterations && result.error > options.treshold; i++) {
 
             var iterationError = 0;
 
@@ -65,20 +70,18 @@ class Trainer {
                 );
             }
 
-            globalError = iterationError / data.length;
+            result.error = iterationError / data.length;
 
             if (options.callback && (i % options.interval == 0)) {
-                options.callback({ error: globalError, iterations: i });
+                options.callback(result);
             }
 
-            iterationsCount++;
+            result.iterations++;
+
+            result.time = (new Date().getTime()) - timeStart;
         }
 
-
-        return {
-            error: globalError,
-            iterations: iterationsCount,
-        };
+        return result;
     }
 
     trainPattern(input, target, learning, momentum) {
