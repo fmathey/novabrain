@@ -21,7 +21,12 @@ var config = {
                 exclude: node_modules_dir,
                 loaders: [
                     'babel-loader'
-                ]
+                ],
+                options: {
+                    //query: {
+                        presets: ["es2015"]
+                    //}
+                }
             }
         ]
     },
